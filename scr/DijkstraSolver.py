@@ -1,7 +1,7 @@
 import BasicSolver
 import sys
 import os
-import time
+import time, math
 import multiprocessing
 import copy
 from pymongo import MongoClient
@@ -9,6 +9,8 @@ from datetime import timedelta, date, datetime
 from math import sin, cos, sqrt, atan2, pi, acos
 from tqdm import tqdm
 import time as atime
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+import transfer_tools
 client = MongoClient('mongodb://localhost:27017/')
 
 
@@ -40,6 +42,7 @@ class DijkstraSolver(BasicSolver.BasicSolver):
         self.curDateTime = datetime.fromtimestamp(timestamp)
         self.curDate = self.curDateTime.date()
         todayDate = self.curDate.strftime("%Y%m%d")
+        self.todayDate = todayDate
         self.curGTFSTimestamp = self.find_gtfs_time_stamp(self.curDate)
 
         # print("current GTFS timestamp", self.curGTFSTimestamp)
@@ -55,11 +58,13 @@ class DijkstraSolver(BasicSolver.BasicSolver):
         self.db_scooter = client.lime_location
         self.col_scooter = self.db_scooter[todayDate]
 
-        self.db_access = client.cota_access
+        self.db_access = client.cota_access_rel
 
         self.rl_stops = list(self.col_stops.find({}))
         self.rl_stop_times = list(self.col_real_times.find({"time": {"$gt": timestamp, "$lt": self.timeLimit}})) if isRealTime else list(
             self.col_real_times.find({"scheduled_time": {"$gt": timestamp, "$lt": self.timeLimit}}))
+        
+        # print(len(self.rl_stop_times), timestamp, self.timeLimit)
 
         if self.rl_stop_times != None:
             if isRealTime:
@@ -152,7 +157,7 @@ class DijkstraSolver(BasicSolver.BasicSolver):
 
         return dist
 
-    def findClosestStop(self):
+    def findClosestStop(self, isOG=False):
         minDistance = sys.maxsize
         closestStop = False
         for eachStop in self.rl_stops:
@@ -160,9 +165,15 @@ class DijkstraSolver(BasicSolver.BasicSolver):
             # print(minDistance, self.visitedSet[eachStopID]['time'])
             # if self.visitedSet[eachStopID]['time'] < minDistance:
             #     print(eachStopID, self.visitedSet[eachStopID]['visitTag'])
-            if self.visitedSet[eachStopID]['time'] < minDistance and self.visitedSet[eachStopID]['visitTag'] == False:
-                minDistance = self.visitedSet[eachStopID]['time']
-                closestStop = eachStop
+            if not isOG:
+                if self.visitedSet[eachStopID]['time'] < minDistance and self.visitedSet[eachStopID]['visitTag'] == False:
+                    minDistance = self.visitedSet[eachStopID]['time']
+                    closestStop = eachStop
+            else:
+                if self.visitedSet[eachStopID]['timeOG'] < minDistance and self.visitedSet[eachStopID]['visitTagOG'] == False:
+                    minDistance = self.visitedSet[eachStopID]['timeOG']
+                    closestStop = eachStop
+        # print(closestStop)
         return closestStop
 
     def getTravelTime(self, closestStopID, eachStopID, aStartTime):
@@ -198,7 +209,7 @@ class DijkstraSolver(BasicSolver.BasicSolver):
             self.arcsDic[closestStopID][eachStopID]
         except:
             pass # Not bus trip
-        else: 
+        else:
             for eachIndex, eachTrip in self.arcsDic[closestStopID][eachStopID].items():
                 if eachTrip["time_gen"] >= aStartTime:
                     recentBusTime = eachTrip["time_gen"]
@@ -254,8 +265,9 @@ class DijkstraSolver(BasicSolver.BasicSolver):
             
             scooterID = None
             increment = None
+
+            totalTime_scooter = sys.maxsize
             if surroundingScootersList != []:
-                totalTime_scooter = sys.maxsize
                 for closestScooter in surroundingScootersList:
                     scooterLocation = {
                         "stop_lat": closestScooter["latitude"],
@@ -270,9 +282,10 @@ class DijkstraSolver(BasicSolver.BasicSolver):
                         continue
                     if scooterDist_scooter > self.scooterDistanceLimit:
                         continue
-                    scooterTime_scooter = scooterDist_scooter/self.scooterSpeed
-                    walkTime_scooter = walkDist_scooter/self.walkingSpeed
-                    if totalTime_scooter > scooterTime_scooter + walkTime_scooter:
+                    
+                    if totalTime_scooter > scooterDist_scooter/self.scooterSpeed + walkDist_scooter/self.walkingSpeed:
+                        scooterTime_scooter = scooterDist_scooter/self.scooterSpeed
+                        walkTime_scooter = walkDist_scooter/self.walkingSpeed
                         totalTime_scooter = scooterTime_scooter + walkTime_scooter
                         scooterID = closestScooter["new_id"]
                         increment = totalTime_walk - totalTime_scooter
@@ -289,38 +302,113 @@ class DijkstraSolver(BasicSolver.BasicSolver):
                 travelTime["tripType"] = "scooter"
         
         return travelTime
-    
-    def addToTravelTime(self, originalStrucuture, closestStructure, travelTime, tempStartTimestamp):
-        originalStrucuture["time"] = closestStructure["time"] + travelTime["time"]
-        originalStrucuture["scooterTime"] = closestStructure["scooterTime"] + travelTime["scooterTime"]
-        originalStrucuture["walkTime"] = closestStructure["walkTime"] + travelTime["walkTime"]
-        originalStrucuture["busTime"] = closestStructure["busTime"] + travelTime["busTime"]
-        originalStrucuture["waitTime"] = closestStructure["waitTime"] + travelTime["waitTime"]
-        originalStrucuture["lastTripType"] = travelTime["tripType"]
-        originalStrucuture["lastTripID"] = travelTime["tripID"]
-        originalStrucuture["generatingStopID"] = travelTime["generatingStopID"]
-        originalStrucuture["receivingStopID"] = travelTime["receivingStopID"]
 
-        if travelTime["busTime"] == 0:
-            originalStrucuture["transferCount"] += 1
+    def getTravelTimeOG(self, closestStopID, eachStopID, aStartTime):
+        # With bus trip, can wait and bus or walk
+        # All methods are exclusive between two stops. Options:
+        # 1. bus + wait. For all arcs.
+        # 2. walk. 
 
+        # Risk1: may incur meaningless transfers; but we are not controlling that anyway. Possible solution: control trip_id or transfer_count
+        # Risk2: how to deal with last-mile scooters? Mimic the first version.
+        # Risk3: how to distinguish the first-mile trip? if timestamp is the starttimestamp, propagate using scooter; if not, propagate using walking
+        travelTime = {
+            "generatingStopIDOG": closestStopID,
+            "receivingStopID": eachStopID,
+            "timeOG": sys.maxsize,
+            "walkTimeOG": None,
+            "busTimeOG": None,
+            "waitTimeOG": None,
+            "tripIDOG": None,
+            "tripTypeOG": None
+        }
 
-        if tempStartTimestamp == self.timestamp:
-            originalStrucuture["firstScooterID"] = travelTime['scooterID']
-            originalStrucuture["firstScooterIncrement"] = travelTime["increment"]
+        closestStop = self.stopsDic[closestStopID]
+        eachStop = self.stopsDic[eachStopID]
+
+        # 1. Propagate with bus and wait. Not controlling transfer count. Select the most recent trip.
+        # More greedy: if there is a bus trip, wait for that regardless of the expected saved time by walking.
+        try:
+            self.arcsDic[closestStopID][eachStopID]
+        except:
+            pass # Not bus trip
         else:
-            originalStrucuture["lastScooterID"] = travelTime['scooterID']
-            originalStrucuture["lastScooterIncrement"] = travelTime["increment"]
-            originalStrucuture["firstScooterID"] = closestStructure['firstScooterID']
-            originalStrucuture["firstScooterIncrement"] = closestStructure["firstScooterIncrement"]
+            for eachIndex, eachTrip in self.arcsDic[closestStopID][eachStopID].items():
+                if eachTrip["time_gen"] >= aStartTime:
+                    recentBusTime = eachTrip["time_gen"]
+                    travelTime["tripIDOG"] = eachTrip["trip_id"]
+                    travelTime["busTimeOG"] = eachTrip["bus_time"]
+                    travelTime["waitTimeOG"] = recentBusTime - aStartTime
+                    travelTime["walkTimeOG"] = 0
+                    travelTime["timeOG"] = travelTime["busTimeOG"] + travelTime["waitTimeOG"]
+                    travelTime["tripTypeOG"] = "bus"
+                    break
+            return travelTime
+            
+        # 2. Propagate with walk
+        # No edge, can only walk/scooter
+        if self.visitedSet[closestStopID]["lastTripTypeOG"] == "walk" or self.visitedSet[closestStopID]["lastTripTypeOG"] == "scooter": # cannot make two subsequent non-transit arcs.
+            return travelTime
+        dist = self.calculateDistance(self.stopsDic[closestStopID], self.stopsDic[eachStopID]) # Can be precalculated
+        walkTime_walk = dist/self.walkingSpeed
+        totalTime_walk = walkTime_walk
+
+        if totalTime_walk > self.walkingTimeLimit:
+            pass
+        elif travelTime["timeOG"] > totalTime_walk: # if no bus trip, travelTime["time"] should be maxsize; or, the bus trip is very slow, but very unlikely
+            travelTime["busTimeOG"] = 0
+            travelTime["waitTimeOG"] = 0
+            travelTime["walkTimeOG"] = walkTime_walk
+            travelTime["timeOG"] = totalTime_walk
+            travelTime["tripTypeOG"] = "walk"
+
+        return travelTime
+
+    def addToTravelTime(self, originalStrucuture, closestStructure, travelTime, tempStartTimestamp, isOG=False):
+        if not isOG:
+            originalStrucuture["time"] = closestStructure["time"] + travelTime["time"]
+            originalStrucuture["scooterTime"] = closestStructure["scooterTime"] + travelTime["scooterTime"]
+            originalStrucuture["walkTime"] = closestStructure["walkTime"] + travelTime["walkTime"]
+            originalStrucuture["busTime"] = closestStructure["busTime"] + travelTime["busTime"]
+            originalStrucuture["waitTime"] = closestStructure["waitTime"] + travelTime["waitTime"]
+            
+            if travelTime["tripType"] == "bus" and travelTime["tripID"] != originalStrucuture["lastTripID"]:
+                originalStrucuture["transferCount"] += 1
+
+            originalStrucuture["lastTripType"] = travelTime["tripType"]
+            originalStrucuture["lastTripID"] = travelTime["tripID"]
+            originalStrucuture["generatingStopID"] = travelTime["generatingStopID"]
+            if tempStartTimestamp == self.timestamp:
+                originalStrucuture["firstScooterID"] = travelTime['scooterID']
+                originalStrucuture["firstScooterIncrement"] = travelTime["increment"]
+            else:
+                originalStrucuture["lastScooterID"] = travelTime['scooterID']
+                originalStrucuture["lastScooterIncrement"] = travelTime["increment"]
+                originalStrucuture["firstScooterID"] = closestStructure['firstScooterID']
+                originalStrucuture["firstScooterIncrement"] = closestStructure["firstScooterIncrement"]
+        else:
+            originalStrucuture["timeOG"] = closestStructure["timeOG"] + travelTime["timeOG"]
+            originalStrucuture["walkTimeOG"] = closestStructure["walkTimeOG"] + travelTime["walkTimeOG"]
+            originalStrucuture["busTimeOG"] = closestStructure["busTimeOG"] + travelTime["busTimeOG"]
+            originalStrucuture["waitTimeOG"] = closestStructure["waitTimeOG"] + travelTime["waitTimeOG"]
+            
+            if travelTime["tripTypeOG"] == "bus" and travelTime["tripIDOG"] != originalStrucuture["lastTripIDOG"]:
+                originalStrucuture["transferCountOG"] += 1
+
+            originalStrucuture["lastTripTypeOG"] = travelTime["tripTypeOG"]
+            originalStrucuture["lastTripIDOG"] = travelTime["tripIDOG"]
+            originalStrucuture["generatingStopIDOG"] = travelTime["generatingStopIDOG"]
         
-        
-        
+        originalStrucuture["receivingStopID"] = travelTime["receivingStopID"]
+        originalStrucuture["stop_lat"] = self.stopsDic[travelTime["receivingStopID"]]["stop_lat"]
+        originalStrucuture["stop_lon"] = self.stopsDic[travelTime["receivingStopID"]]["stop_lon"]
 
         return originalStrucuture
 
+
     # Dijkstraly find shortest time to each stop.
     def extendStops(self, startStopID):
+        self.aStartStopID = startStopID
         startTimestamp = self.timestamp
         self.visitedSet = {}
         for eachStop in self.rl_stops: # Initialization
@@ -341,15 +429,27 @@ class DijkstraSolver(BasicSolver.BasicSolver):
                 "firstScooterIncrement": None,
                 "lastScooterID": None,
                 "lastScooterIncrement": None,
-                "visitTag": False
-            }
+                "visitTag": False,
+                "timeOG": sys.maxsize,
+                "walkTimeOG": 0,
+                "busTimeOG": 0,
+                "waitTimeOG": 0,
+                "generatingStopIDOG": None,
+                "receivingStopIDOG": None,
+                "lastTripIDOG": None,
+                "lastTripTypeOG": None,
+                "transferCountOG": 0,
+                "visitTagOG": False
+            } # OG is the times of the non-scooter trip. 
 
         self.visitedSet[startStopID]["time"] = 0 # initialization
+        self.visitedSet[startStopID]["timeOG"] = 0 # initialization
 
-        for _ in tqdm(self.rl_stops):
-            closestStop = self.findClosestStop()
+        # OD and trips with scooters
+        for _ in (self.rl_stops):
+            closestStop = self.findClosestStop(False) # Dijkstra's algorithm: find the closest node to the S set, which is the ones having the confirmed clostest distance.
             if closestStop == False:
-                print("break!")
+                # print("break!")
                 break
             closestStopID = closestStop["stop_id"]
 
@@ -370,47 +470,109 @@ class DijkstraSolver(BasicSolver.BasicSolver):
                     # print("changed: ", self.visitedSet[eachStopID])
             # print(_["stop_id"], "finished!")
             # break
-        self.insertResults(startStopID)
         # print(self.visitedSet)
+
+        # OD and trips without scooters (normal propagation)
+        for _ in (self.rl_stops):
+            closestStop = self.findClosestStop(True) # Dijkstra's algorithm: find the closest node to the S set, which is the ones having the confirmed clostest distance.
+            if closestStop == False:
+                # print("break!")
+                break
+            closestStopID = closestStop["stop_id"]
+
+            self.visitedSet[closestStopID]["visitTagOG"] = True
+
+            # Can modify self.rl_stops to improve performance.
+
+            for eachStop in (self.rl_stops):
+                eachStopID = eachStop["stop_id"]
+                tempStartTimestamp = startTimestamp + self.visitedSet[closestStopID]["timeOG"]
+                travelTime = self.getTravelTimeOG(closestStopID, eachStopID, tempStartTimestamp)
+                # if travelTime["tripType"] != None:
+                #     print(self.visitedSet[eachStopID]["time"] > self.visitedSet[closestStopID]["time"] + travelTime["time"])
+                if travelTime["timeOG"] == None:
+                    continue
+                if travelTime['timeOG'] > 0 and self.visitedSet[eachStopID]["visitTagOG"] == False and self.visitedSet[eachStopID]["timeOG"] > self.visitedSet[closestStopID]["timeOG"] + travelTime["timeOG"]:
+                    self.visitedSet[eachStopID] = self.addToTravelTime(self.visitedSet[eachStopID], self.visitedSet[closestStopID], travelTime, tempStartTimestamp, True)
+                    # print("changed: ", self.visitedSet[eachStopID])
+            # print(_["stop_id"], "finished!")
+            # break
+        # print(self.visitedSet)
+
         return self.visitedSet
 
-    def insertResults(self, startStopID):
-        ID = 'scooter' if self.isScooter else 'normal'
-        col_access = self.db_access["abtest_" + ID + "_" + str(int(self.timestamp))]
-        accessibleStops = self.visitedSet
-        print("--------------------------------------------------------")
-        col_access.drop()
-        for eachStopIndex, eachStopValue in accessibleStops.items():
-            if eachStopValue["lastTripType"] != None:
-                stopID = eachStopValue["receivingStopID"]
-                eachStopValue["stop_lat"] = self.stopsDic[stopID]["stop_lat"]
-                eachStopValue["stop_lon"] = self.stopsDic[stopID]["stop_lon"]
-                col_access.insert_one(eachStopValue)
-        
-        col_access.create_index([("startStopID", 1)])
 
 
 def singleAccessibilitySolve(args, startLocation):
     # print(args, startLocation)
     accessibilitySolver = DijkstraSolver(args)
     lenStops = accessibilitySolver.extendStops(startLocation)
+    del accessibilitySolver
     return lenStops
 
 def collectiveAccessibilitySolve(args, sampledStopsList):
-    pool = multiprocessing.Pool(processes=31)
-    output = []
-    output = pool.starmap(singleAccessibilitySolve, zip([args]*len(sampledStopsList), sampledStopsList))
-    pool.close()
-    pool.join()
-    return output
+    cores = 30
+    total_length = len(sampledStopsList)
+    batch = math.ceil(total_length/cores)
+    for i in tqdm(list(range(batch))):
+        pool = multiprocessing.Pool(processes=cores)
+        sub_output = []
+        try:
+            sub_sampledStopsList = sampledStopsList[cores*i:cores*(i+1)]
+        except:
+            sub_sampledStopsList = sampledStopsList[cores*i:]
+        sub_output = pool.starmap(singleAccessibilitySolve, zip([args]*len(sub_sampledStopsList), sub_sampledStopsList))
+        pool.close()
+        pool.join()
+        collectiveInsert(args, sub_output)
+
+def collectiveInsert(args, output):
+    timestamp = args[0]
+    walkingDistanceLimit = args[1]
+    timeDeltaLimit = args[2]
+    walkingSpeed = args[3]
+    scooterSpeed = args[4]
+    scooterDistanceLimit = args[5]
+    isRealTime = args[6]
+    isScooter = args[7]
+    
+    curDateTime = datetime.fromtimestamp(timestamp)
+    curDate = curDateTime.date()
+    todayDate = curDate.strftime("%Y%m%d")
+    recordCollection = []
+
+    ID = 'scooter' if isScooter else 'normal'
+    col_access = client.cota_access_rel["acc_" + ID + "_" + todayDate + "_" +str(int(timestamp))]
+    col_access.drop()
+
+    count = 0
+    for eachVisitedSet in output:
+        accessibleStops = eachVisitedSet
+        for eachStopIndex, eachStopValue in accessibleStops.items():
+            # print(eachStopValue)
+            if eachStopValue["lastTripType"] != None:
+
+                recordCollection.append(eachStopValue)
+                eachStopValue["lastMileIncrement"] = None
+                eachStopValue["firstMileIncrement"] = None
+                if eachStopValue["lastScooterIncrement"] != None:
+                    eachStopValue["lastMileIncrement"] = eachStopValue["lastScooterIncrement"]
+                    eachStopValue["firstMileIncrement"] = eachStopValue["timeOG"] - eachStopValue["time"] -eachStopValue["lastScooterIncrement"]
+                else:
+                    eachStopValue["firstMileIncrement"] = eachStopValue["timeOG"] - eachStopValue["time"]
+                # col_access.insert_one(eachStopValue)
+                count += 1
+    col_access.insert_many(recordCollection)
+    print("-----", todayDate, "-----", int(timestamp), "-----", count)
+    col_access.create_index([("startStopID", 1)])
 
 if __name__ == "__main__":
     basicSolver = BasicSolver.BasicSolver()
     # startDate = date(2019, 6, 20)
-    startDate = date(2019, 6, 30)
+    startDate = date(2019, 7, 1)
     endDate = date(2019, 12, 18)
     walkingDistanceLimit = 700
-    timeDeltaLimit = 30 * 60
+    timeDeltaLimit = 120 * 60
     walkingSpeed = 1.4
     scooterSpeed = 4.47  # 10 mph
     scooterDistanceLimit = (5-1)/0.32*4.47*60 # 5 dollar 
@@ -418,10 +580,32 @@ if __name__ == "__main__":
     isRealTime = True
     isScooter = False
     daterange = (basicSolver.daterange(startDate, endDate))
-
+    numberOfTimeSamples = 1 # how many samples you want to calculate per hour. If the value = 1, then every 1 hour. If 4, then every 15 minutes.
+    
+    
+        
     for singleDate in (daterange):
         GTFSTimestamp = basicSolver.find_gtfs_time_stamp(singleDate)
         todaySeconds = atime.mktime(singleDate.timetuple())
+        gtfsSeconds = str(transfer_tools.find_gtfs_time_stamp(singleDate))
+        
+        # Sample stops list
+        sampledStopsList = ['MOREASS', 'HIGCOON', '4TH15TN', 'TREZOLS', 'KARPAUN', 'LIVGRAE', 'GRESHEW', 'MAIOHIW', 'AGL540W', 'WHIJAEE', '3RDCAMW', 'HARZETS', 'MAIBRICE', 'SAI2NDS', '3RDMAIS', 'STYCHAS', 'LOC230N', 'BETDIEW', 'STEMCCS', 'INNWESE', 'HANMAIN', 'HIGINDN', '4THCHIN', 'RIDSOME', 'KARHUYN', 'LIVBURE', 'LONWINE', 'MAICHAW', 'BROHAMIW', 'WHI3RDE', '1STLINW', 'MAINOEW', 'MAIIDLE', '5THCLEE', '3RDTOWS', 'STYGAMS', 'KOE113W', 'TAM464S', 'CAS150S', 'BROOUTE', 'ALUGLENS', 'FRABREN', 'SOU340N', 'HILTINS', 'STRHOVE', 'SAWCOPN', 'HAMWORN', 'DALDUBN', 'MCNCHEN', 'HILBEAS', 'NOROWEN', 'SOUTER2A', 'GENSHAN', 'VACLINIC', 'MORHEATE', 'KOEEDSW1', 'TRAMCKW', 'FAISOUN', 'SAWSAWN', 'CLIHOLE', 'CHAMARN', 'CLE24THN']
+        
+        # Full stops
+        db_GTFS = client.cota_gtfs
+        col_stop = db_GTFS[gtfsSeconds + '_stops']
+        rl_stop = list(col_stop.find({}))
+        sampledStopsList = []
+        for i in rl_stop:
+            sampledStopsList.append(i["stop_id"])
+
+        todayTimestampList = []
+        # for i in range(24*numberOfTimeSamples):
+        #     todayTimestampList.append(todaySeconds + i* 60*60/numberOfTimeSamples)
+        for i in [8, 12, 18]:
+            todayTimestampList.append(todaySeconds + i* 60*60/numberOfTimeSamples)
+        
         # dbStops = client.cota_gtfs[str(GTFSTimestamp) + "_stops"]
         # allStopsList = dbStops.find({})
         # sampledStopsList = []
@@ -431,22 +615,21 @@ if __name__ == "__main__":
         #         sampledStopsList.append(eachStops["stop_id"])
         #     sampler += 1
 
-        sampledStopsList = ['MOREASS', 'HIGCOON', '4TH15TN', 'TREZOLS', 'KARPAUN', 'LIVGRAE', 'GRESHEW', 'MAIOHIW', 'AGL540W', 'WHIJAEE', '3RDCAMW', 'HARZETS', 'MAIBRICE', 'SAI2NDS', '3RDMAIS', 'STYCHAS', 'LOC230N', 'BETDIEW', 'STEMCCS', 'INNWESE', 'HANMAIN', 'HIGINDN', '4THCHIN', 'RIDSOME', 'KARHUYN', 'LIVBURE', 'LONWINE', 'MAICHAW', 'BROHAMIW', 'WHI3RDE', '1STLINW', 'MAINOEW', 'MAIIDLE', '5THCLEE', '3RDTOWS', 'STYGAMS', 'KOE113W', 'TAM464S', 'CAS150S', 'BROOUTE', 'ALUGLENS', 'FRABREN', 'SOU340N', 'HILTINS', 'STRHOVE', 'SAWCOPN', 'HAMWORN', 'DALDUBN', 'MCNCHEN', 'HILBEAS', 'NOROWEN', 'SOUTER2A', 'GENSHAN', 'VACLINIC', 'MORHEATE', 'KOEEDSW1', 'TRAMCKW', 'FAISOUN', 'SAWSAWN', 'CLIHOLE', 'CHAMARN', 'CLE24THN']
-        
-        print("Date: ", singleDate, "; Stops: ", len(sampledStopsList))
+        # print("Date: ", singleDate, "; Stops: ", len(sampledStopsList))
         # todayTimestampList = [todaySeconds + 28800, todaySeconds + 46800, todaySeconds + 64800]
-        todayTimestampList = [todaySeconds + 64800]
         for eachTimestamp in todayTimestampList:
             # if eachTimestamp != 1563192000: # debug and restart
             #     continue
             args = [int(eachTimestamp), walkingDistanceLimit, timeDeltaLimit, walkingSpeed, scooterSpeed, scooterDistanceLimit, isRealTime, isScooter]
-            # resultsFeedback = collectiveAccessibilitySolve(args, sampledStopsList)
-
-            testStopID = "3RDMAIS"
-            resultsFeedback = singleAccessibilitySolve(args, testStopID)
             
-            # print("eachTimestamp:", int(eachTimestamp), "results lens: ", resultsFeedback)
-            print("--------------------------------------------------------------------------------")
-            break
+            resultsFeedback = collectiveAccessibilitySolve(args, sampledStopsList)
+            # resultsFeedback = collectiveAccessibilitySolve(args, ["3RDMAIS"])
+
+            # testStopID = "3RDMAIS"
+            # resultsFeedback = singleAccessibilitySolve(args, testStopID)
+            
+            # print("eachTimestamp:", int(eachTimestamp), "results lens: ", len(resultsFeedback))
+            print("******************", singleDate, eachTimestamp, "******************")
+            # break
         break
             
