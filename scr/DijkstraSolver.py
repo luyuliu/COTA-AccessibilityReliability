@@ -250,6 +250,9 @@ class DijkstraSolver(BasicSolver.BasicSolver):
 
         # 1. Propagate with bus and wait. Not controlling transfer count. Select the most recent trip.
         # More greedy: if there is a bus trip, wait for that regardless of the expected saved time by walking.
+    
+        dist = self.calculateDistance(self.stopsDic[closestStopID], self.stopsDic[eachStopID]) # Can be precalculated
+        walkTime_walk = dist/self.walkingSpeed
         try:
             self.arcsDicRT[closestStopID][eachStopID]
         except:
@@ -265,14 +268,15 @@ class DijkstraSolver(BasicSolver.BasicSolver):
                     travelTime["timeRT"] = travelTime["busTimeRT"] + travelTime["waitTimeRT"]
                     travelTime["tripTypeRT"] = "bus"
                     break
+            
+            # if walkTime_walk > travelTime["timeRT"]:
             return travelTime
             
         # 2. Propagate with walk
         # No edge, can only walk/scooter
         if self.visitedSet[closestStopID]["lastTripTypeRT"] == "walk": # cannot make two subsequent non-transit arcs.
             return travelTime
-        dist = self.calculateDistance(self.stopsDic[closestStopID], self.stopsDic[eachStopID]) # Can be precalculated
-        walkTime_walk = dist/self.walkingSpeed
+        
         totalTime_walk = walkTime_walk
 
         if totalTime_walk > self.walkingTimeLimit:
@@ -283,6 +287,7 @@ class DijkstraSolver(BasicSolver.BasicSolver):
             travelTime["walkTimeRT"] = walkTime_walk
             travelTime["timeRT"] = totalTime_walk
             travelTime["tripTypeRT"] = "walk"
+            travelTime["tripIDRT"] = None
 
         return travelTime
 
