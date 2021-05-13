@@ -251,8 +251,6 @@ class DijkstraSolver(BasicSolver.BasicSolver):
         # 1. Propagate with bus and wait. Not controlling transfer count. Select the most recent trip.
         # More greedy: if there is a bus trip, wait for that regardless of the expected saved time by walking.
     
-        dist = self.calculateDistance(self.stopsDic[closestStopID], self.stopsDic[eachStopID]) # Can be precalculated
-        walkTime_walk = dist/self.walkingSpeed
         try:
             self.arcsDicRT[closestStopID][eachStopID]
         except:
@@ -277,6 +275,8 @@ class DijkstraSolver(BasicSolver.BasicSolver):
         if self.visitedSet[closestStopID]["lastTripTypeRT"] == "walk": # cannot make two subsequent non-transit arcs.
             return travelTime
         
+        dist = self.calculateDistance(self.stopsDic[closestStopID], self.stopsDic[eachStopID]) # Can be precalculated
+        walkTime_walk = dist/self.walkingSpeed
         totalTime_walk = walkTime_walk
 
         if totalTime_walk > self.walkingTimeLimit:
@@ -380,7 +380,7 @@ class DijkstraSolver(BasicSolver.BasicSolver):
             originalStrucuture["lastTripIDSC"] = travelTime["tripIDSC"]
             originalStrucuture["generatingStopIDSC"] = travelTime["generatingStopIDSC"]
         
-        if isRT: # Use a same field for the RT and SC
+        if isRT: # Use a same field for the RT and SC, because RT is before SC in the extendStop
             originalStrucuture["receivingStopID"] = travelTime["receivingStopIDRT"] 
             originalStrucuture["stop_lat"] = self.stopsDic[travelTime["receivingStopIDRT"]]["stop_lat"]
             originalStrucuture["stop_lon"] = self.stopsDic[travelTime["receivingStopIDRT"]]["stop_lon"]

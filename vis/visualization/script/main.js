@@ -387,6 +387,8 @@ $('#show-tragectory-button').click(function () {
         color: "red"
       }).addTo(map);
 
+      marker.bindPopup(endPoint["receivingStopID"])
+
       count++;
       if (count > 2000) {
         break
@@ -427,6 +429,9 @@ $('#show-tragectory-button').click(function () {
       var marker = L.circle([endPoint["stop_lat"], endPoint["stop_lon"]], {
         radius: 80
       }).addTo(map);
+      
+      marker.bindPopup(endPoint["receivingStopID"])
+      
       count++;
       if (count > 2000) {
         break
