@@ -169,6 +169,8 @@ class DijkstraSolver(BasicSolver.BasicSolver):
                     self.arcsDicSC[generatingStopID][receivingStopID][timeGen] = {
                         'time_gen': timeGen, 'time_rec': timeRec, 'bus_time': - timeGen + timeRec, "trip_id": eachTripID}
 
+        DEBUG_ARC = self.arcsDicRT["NORBARNW"]["NORGUINW"]
+        DEBUG_ARC1 = self.arcsDicSC["NORBARNW"]["NORGUINW"]
         self.count = 0
         # print("Initialization: Done!")
 
@@ -433,8 +435,11 @@ class DijkstraSolver(BasicSolver.BasicSolver):
 
             # Can modify self.rl_stops to improve performance.
 
-            for eachStop in (self.rl_stops):
+            for eachStop in (self.rl_stops): # For every neighbor of the closest stop to the set S, which is the ones having the confirmed closest distance.
                 eachStopID = eachStop["stop_id"]
+                if self.visitedSet[eachStopID]["visitTagRT"] == True:
+                    continue
+                
                 tempStartTimestamp = startTimestamp + self.visitedSet[closestStopID]["timeRT"]
                 travelTime = self.getTravelTimeRT(closestStopID, eachStopID, tempStartTimestamp)
                 # if travelTime["tripType"] != None:
@@ -456,12 +461,14 @@ class DijkstraSolver(BasicSolver.BasicSolver):
                 break
             closestStopID = closestStop["stop_id"]
 
-            self.visitedSet[closestStopID]["visitTagSC"] = True
+            self.visitedSet[closestStopID]["visitTagSC"] = True # Add closest stop to S set. 
 
             # Can modify self.rl_stops to improve performance.
 
             for eachStop in (self.rl_stops):
                 eachStopID = eachStop["stop_id"]
+                if self.visitedSet[eachStopID]["visitTagSC"] == True:
+                    continue
                 tempStartTimestamp = startTimestamp + self.visitedSet[closestStopID]["timeSC"]
                 travelTime = self.getTravelTimeSC(closestStopID, eachStopID, tempStartTimestamp)
                 # if travelTime["tripType"] != None:
@@ -470,7 +477,9 @@ class DijkstraSolver(BasicSolver.BasicSolver):
                     continue
                 if travelTime['timeSC'] > 0 and self.visitedSet[eachStopID]["visitTagSC"] == False and self.visitedSet[eachStopID]["timeSC"] > self.visitedSet[closestStopID]["timeSC"] + travelTime["timeSC"]:
                     self.visitedSet[eachStopID] = self.addToTravelTime(self.visitedSet[eachStopID], self.visitedSet[closestStopID], travelTime, tempStartTimestamp, False)
-                    # print("changed: ", self.visitedSet[eachStopID])
+                    
+                    if eachStopID == "ZOLNORW3":
+                        print("changed: ", self.visitedSet[eachStopID])
             # print(_["stop_id"], "finished!")
             # break
         # print(self.visitedSet)
@@ -519,7 +528,7 @@ def collectiveInsert(args, output):
     recordCollection = []
 
     ID = 'scooter' if isScooter else 'normal'
-    col_access = client.cota_access_rel["acc_" + todayDate + "_" +str(int(timestamp))]
+    col_access = client.cota_access_rel["acctest_" + todayDate + "_" +str(int(timestamp))]
 
     count = 0
     for eachVisitedSet in output:
@@ -536,7 +545,7 @@ def collectiveInsert(args, output):
 if __name__ == "__main__":
     basicSolver = BasicSolver.BasicSolver()
     # startDate = date(2019, 6, 20)
-    startDate = date(2019, 7, 2)
+    startDate = date(2019, 7, 1)
     endDate = date(2019, 12, 18)
     walkingDistanceLimit = 700
     timeDeltaLimit = 150 * 60
@@ -591,14 +600,14 @@ if __name__ == "__main__":
             #     continue
             args = [int(eachTimestamp), walkingDistanceLimit, timeDeltaLimit, walkingSpeed, scooterSpeed, scooterDistanceLimit, isRealTime, isScooter]
             
-            resultsFeedback = collectiveAccessibilitySolve(args, sampledStopsList)
-            # resultsFeedback = collectiveAccessibilitySolve(args, ["3RDMAIS"])
+            # resultsFeedback = collectiveAccessibilitySolve(args, sampledStopsList)
+            # resultsFeedback = collectiveAccessibilitySolve(args, ["3RDCAMW"])
 
-            # testStopID = "3RDMAIS"
-            # resultsFeedback = singleAccessibilitySolve(args, testStopID)
+            testStopID = "3RDCAMW"
+            resultsFeedback = singleAccessibilitySolve(args, testStopID)
             
             # print("eachTimestamp:", int(eachTimestamp), "results lens: ", len(resultsFeedback))
             print("******************", singleDate, eachTimestamp, "******************")
-            # break
-        # break
+            break
+        break
             

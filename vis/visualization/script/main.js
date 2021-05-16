@@ -45,6 +45,32 @@ function createCORSRequest(method, url) {
   return xhr;
 }
 
+function calculateDistance(self, latlng1, latlng2){
+  R = 6373
+  lat1 = float(latlng1[0])
+  lon1 = float(latlng1[1])
+  lat2 = float(latlng2[0])
+  lon2 = float(latlng2[1])
+  pi = 3.1415926
+
+  theta = lon1 - lon2
+  radtheta = pi * theta / 180
+  radlat1 = pi * lat1 / 180
+  radlat2 = pi * lat2 / 180
+
+  dist = Math.sin(radlat1) * Math.sin(radlat2) + Math.cos(radlat1) * Math.cos(radlat2) * Math.cos(radtheta)
+  try{
+    dist = Math.acos(dist)
+  }
+  catch (err){
+        dist = 0
+  }
+  dist = dist * 180 / pi * 60 * 1.1515 * 1609.344 / 1.4
+
+  return dist
+
+}
+
 var scooterIcon = L.icon({
   iconUrl: './img/s.svg',
   iconSize: [20, 20], // size of the icon
@@ -328,7 +354,7 @@ $('#show-tragectory-button').click(function () {
   var start_stop = $("#start-stop-input").val();
   // var start_stop = "3RDMAIS"
   var end_stop = $("#end-stop-input").val();
-
+  var startTimestamp = 1561982400
   var queryURL = 'http://127.0.0.1:20196/acc_20190701_1561982400?where={"startStopID":"' + start_stop + '"}';
 
   $.get(queryURL, function (rawstops) {
@@ -378,7 +404,7 @@ $('#show-tragectory-button').click(function () {
       ];
 
       var polyline = L.polyline(latlngs, { color: 'red', weight: 9 }).addTo(map);
-      polyline.bindPopup("<b>trip type: " + endPoint["lastTripTypeRT"] + "   " + endPoint["lastTripIDRT"])
+      polyline.bindPopup("<b>trip type: " + endPoint["lastTripTypeRT"] + "   " + endPoint["lastTripIDRT"] + " " + (endPoint["timeRT"] - startPoint["timeRT"]))
       endPointID = startPointID;
 
 
@@ -386,8 +412,8 @@ $('#show-tragectory-button').click(function () {
         radius: 100,
         color: "red"
       }).addTo(map);
-
-      marker.bindPopup(endPoint["receivingStopID"])
+``
+      marker.bindPopup(endPoint["receivingStopID"] + ", " +  (endPoint["timeRT"] + startTimestamp))
 
       count++;
       if (count > 2000) {
@@ -421,16 +447,16 @@ $('#show-tragectory-button').click(function () {
         endPointLatLng
       ];
 
-      var polyline = L.polyline(latlngs, { color: 'blue', weight: 9 }).addTo(map);
+      var polyline = L.polyline(latlngs, { color: 'blue', weight: 4.5 }).addTo(map);
 
-      polyline.bindPopup("<b>trip type: " + endPoint["lastTripTypeSC"] + "   " + endPoint["lastTripIDSC"])
+      polyline.bindPopup("<b>trip type: " + endPoint["lastTripTypeSC"] + "   " + endPoint["lastTripIDSC"] + " " + (endPoint["timeSC"] - startPoint["timeSC"]))
       endPointID = startPointID;
 
       var marker = L.circle([endPoint["stop_lat"], endPoint["stop_lon"]], {
         radius: 80
       }).addTo(map);
       
-      marker.bindPopup(endPoint["receivingStopID"])
+      marker.bindPopup(endPoint["receivingStopID"] + "," + (endPoint["timeSC"] + startTimestamp) + "," + "SC" )
       
       count++;
       if (count > 2000) {
