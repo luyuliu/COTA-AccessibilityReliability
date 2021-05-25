@@ -355,7 +355,7 @@ $('#show-tragectory-button').click(function () {
   // var start_stop = "3RDMAIS"
   var end_stop = $("#end-stop-input").val();
   var startTimestamp = 1561982400
-  var queryURL = 'http://127.0.0.1:20196/acc_20190701_1561982400?where={"startStopID":"' + start_stop + '"}';
+  var queryURL = 'http://127.0.0.1:20196/acctest_20190701_1561982400?where={"startStopID":"' + start_stop + '"}';
 
   $.get(queryURL, function (rawstops) {
     var stops = rawstops._items;
@@ -413,7 +413,7 @@ $('#show-tragectory-button').click(function () {
         color: "red"
       }).addTo(map);
 ``
-      marker.bindPopup(endPoint["receivingStopID"] + ", " +  (endPoint["timeRT"] + startTimestamp))
+      marker.bindPopup(endPoint["receivingStopID"] + ", " +  (endPoint["timeRT"] + startTimestamp) + "," + "RT" + count)
 
       count++;
       if (count > 2000) {
@@ -456,7 +456,7 @@ $('#show-tragectory-button').click(function () {
         radius: 80
       }).addTo(map);
       
-      marker.bindPopup(endPoint["receivingStopID"] + "," + (endPoint["timeSC"] + startTimestamp) + "," + "SC" )
+      marker.bindPopup(endPoint["receivingStopID"] + "," + (endPoint["timeSC"] + startTimestamp) + "," + "SC" + count)
       
       count++;
       if (count > 2000) {

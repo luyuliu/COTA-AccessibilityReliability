@@ -8,6 +8,7 @@ from pymongo import MongoClient
 from datetime import timedelta, date, datetime
 from math import sin, cos, sqrt, atan2, pi, acos
 from tqdm import tqdm
+from collections import OrderedDict
 import time as atime
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 import transfer_tools
@@ -169,6 +170,15 @@ class DijkstraSolver(BasicSolver.BasicSolver):
                     self.arcsDicSC[generatingStopID][receivingStopID][timeGen] = {
                         'time_gen': timeGen, 'time_rec': timeRec, 'bus_time': - timeGen + timeRec, "trip_id": eachTripID}
 
+        # Sort the arcsDics with OrderedDic.
+        for startStopID, startStop in self.arcsDicRT.items():
+            for endStopID, endStop in startStop.items():
+                self.arcsDicRT[startStopID][endStopID] = OrderedDict(sorted(endStop.items()))
+
+        for startStopID, startStop in self.arcsDicSC.items():
+            for endStopID, endStop in startStop.items():
+                self.arcsDicSC[startStopID][endStopID] = OrderedDict(sorted(endStop.items()))
+
         DEBUG_ARC = self.arcsDicRT["NORBARNW"]["NORGUINW"]
         DEBUG_ARC1 = self.arcsDicSC["NORBARNW"]["NORGUINW"]
         self.count = 0
@@ -258,8 +268,11 @@ class DijkstraSolver(BasicSolver.BasicSolver):
         except:
             pass # Not bus trip
         else:
-            for eachIndex, eachTrip in self.arcsDicRT[closestStopID][eachStopID].items():
-                if eachTrip["time_gen"] >= aStartTime:
+            thisArcsDic = self.arcsDicRT[closestStopID][eachStopID]
+            for eachIndex, eachTrip in thisArcsDic.items():
+                if closestStopID == "NORBARNW":
+                    a = 1
+                if eachTrip["time_gen"] >= aStartTime: # This requires that arcDic[Start][End] to be an ascending sequence. So use OrderedDic to maintain this feature.
                     recentBusTime = eachTrip["time_gen"]
                     travelTime["tripIDRT"] = eachTrip["trip_id"]
                     travelTime["busTimeRT"] = eachTrip["bus_time"]
@@ -437,16 +450,16 @@ class DijkstraSolver(BasicSolver.BasicSolver):
 
             for eachStop in (self.rl_stops): # For every neighbor of the closest stop to the set S, which is the ones having the confirmed closest distance.
                 eachStopID = eachStop["stop_id"]
-                if self.visitedSet[eachStopID]["visitTagRT"] == True:
+                if self.visitedSet[eachStopID]["visitTagRT"] == True: # Only for vertices that not in S.
                     continue
                 
                 tempStartTimestamp = startTimestamp + self.visitedSet[closestStopID]["timeRT"]
-                travelTime = self.getTravelTimeRT(closestStopID, eachStopID, tempStartTimestamp)
+                travelTime = self.getTravelTimeRT(closestStopID, eachStopID, tempStartTimestamp) # Find the weight between closestStop and eachStop
                 # if travelTime["tripType"] != None:
                 #     print(self.visitedSet[eachStopID]["time"] > self.visitedSet[closestStopID]["time"] + travelTime["time"])
                 if travelTime["timeRT"] == None:
                     continue
-                if travelTime['timeRT'] > 0 and self.visitedSet[eachStopID]["visitTagRT"] == False and self.visitedSet[eachStopID]["timeRT"] > self.visitedSet[closestStopID]["timeRT"] + travelTime["timeRT"]:
+                if self.visitedSet[eachStopID]["timeRT"] > self.visitedSet[closestStopID]["timeRT"] + travelTime["timeRT"]:
                     self.visitedSet[eachStopID] = self.addToTravelTime(self.visitedSet[eachStopID], self.visitedSet[closestStopID], travelTime, tempStartTimestamp, True)
                     # print("changed: ", self.visitedSet[eachStopID])
             # print(_["stop_id"], "finished!")
@@ -478,7 +491,7 @@ class DijkstraSolver(BasicSolver.BasicSolver):
                 if travelTime['timeSC'] > 0 and self.visitedSet[eachStopID]["visitTagSC"] == False and self.visitedSet[eachStopID]["timeSC"] > self.visitedSet[closestStopID]["timeSC"] + travelTime["timeSC"]:
                     self.visitedSet[eachStopID] = self.addToTravelTime(self.visitedSet[eachStopID], self.visitedSet[closestStopID], travelTime, tempStartTimestamp, False)
                     
-                    if eachStopID == "ZOLNORW3":
+                    if eachStopID == "NORKINS1":
                         print("changed: ", self.visitedSet[eachStopID])
             # print(_["stop_id"], "finished!")
             # break
@@ -601,10 +614,10 @@ if __name__ == "__main__":
             args = [int(eachTimestamp), walkingDistanceLimit, timeDeltaLimit, walkingSpeed, scooterSpeed, scooterDistanceLimit, isRealTime, isScooter]
             
             # resultsFeedback = collectiveAccessibilitySolve(args, sampledStopsList)
-            # resultsFeedback = collectiveAccessibilitySolve(args, ["3RDCAMW"])
+            resultsFeedback = collectiveAccessibilitySolve(args, ["3RDCAMW"])
 
-            testStopID = "3RDCAMW"
-            resultsFeedback = singleAccessibilitySolve(args, testStopID)
+            # testStopID = "3RDCAMW"
+            # resultsFeedback = singleAccessibilitySolve(args, testStopID)
             
             # print("eachTimestamp:", int(eachTimestamp), "results lens: ", len(resultsFeedback))
             print("******************", singleDate, eachTimestamp, "******************")
