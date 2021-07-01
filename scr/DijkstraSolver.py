@@ -270,8 +270,8 @@ class DijkstraSolver(BasicSolver.BasicSolver):
         else:
             thisArcsDic = self.arcsDicRT[closestStopID][eachStopID]
             for eachIndex, eachTrip in thisArcsDic.items():
-                if closestStopID == "NORBARNW":
-                    a = 1
+                # if closestStopID == "NORBARNW":
+                #     a = 1
                 if eachTrip["time_gen"] >= aStartTime: # This requires that arcDic[Start][End] to be an ascending sequence. So use OrderedDic to maintain this feature.
                     recentBusTime = eachTrip["time_gen"]
                     travelTime["tripIDRT"] = eachTrip["trip_id"]
@@ -491,8 +491,8 @@ class DijkstraSolver(BasicSolver.BasicSolver):
                 if travelTime['timeSC'] > 0 and self.visitedSet[eachStopID]["visitTagSC"] == False and self.visitedSet[eachStopID]["timeSC"] > self.visitedSet[closestStopID]["timeSC"] + travelTime["timeSC"]:
                     self.visitedSet[eachStopID] = self.addToTravelTime(self.visitedSet[eachStopID], self.visitedSet[closestStopID], travelTime, tempStartTimestamp, False)
                     
-                    if eachStopID == "NORKINS1":
-                        print("changed: ", self.visitedSet[eachStopID])
+                    # if eachStopID == "NORKINS1":
+                    #     print("changed: ", self.visitedSet[eachStopID])
             # print(_["stop_id"], "finished!")
             # break
         # print(self.visitedSet)
@@ -540,17 +540,16 @@ def collectiveInsert(args, output):
     todayDate = curDate.strftime("%Y%m%d")
     recordCollection = []
 
-    ID = 'scooter' if isScooter else 'normal'
-    col_access = client.cota_access_rel["acctest_" + todayDate + "_" +str(int(timestamp))]
+    col_access = client.cota_access_rel[todayDate + "_" +str(int(timestamp))]
 
     count = 0
     for eachVisitedSet in output:
         accessibleStops = eachVisitedSet
         for eachStopIndex, eachStopValue in accessibleStops.items():
             # print(eachStopValue)
-            if eachStopValue["lastTripTypeRT"] != None:
-                recordCollection.append(eachStopValue)
-                count += 1
+            # if eachStopValue["lastTripTypeRT"] != None:
+            recordCollection.append(eachStopValue)
+            count += 1
     col_access.insert_many(recordCollection)
     print("-----", todayDate, "-----", int(timestamp), "-----", count)
     col_access.create_index([("startStopID", 1)])
@@ -558,8 +557,8 @@ def collectiveInsert(args, output):
 if __name__ == "__main__":
     basicSolver = BasicSolver.BasicSolver()
     # startDate = date(2019, 6, 20)
-    startDate = date(2019, 7, 1)
-    endDate = date(2019, 12, 18)
+    startDate = date(2018, 2, 1)
+    endDate = date(2020, 7, 1)
     walkingDistanceLimit = 700
     timeDeltaLimit = 150 * 60
     walkingSpeed = 1.4
@@ -579,15 +578,15 @@ if __name__ == "__main__":
         gtfsSeconds = str(transfer_tools.find_gtfs_time_stamp(singleDate))
         
         # 1. Sample stops list
-        sampledStopsList = ['MOREASS', 'HIGCOON', '4TH15TN', 'TREZOLS', 'KARPAUN', 'LIVGRAE', 'GRESHEW', 'MAIOHIW', 'AGL540W', 'WHIJAEE', '3RDCAMW', 'HARZETS', 'MAIBRICE', 'SAI2NDS', '3RDMAIS', 'STYCHAS', 'LOC230N', 'BETDIEW', 'STEMCCS', 'INNWESE', 'HANMAIN', 'HIGINDN', '4THCHIN', 'RIDSOME', 'KARHUYN', 'LIVBURE', 'LONWINE', 'MAICHAW', 'BROHAMIW', 'WHI3RDE', '1STLINW', 'MAINOEW', 'MAIIDLE', '5THCLEE', '3RDTOWS', 'STYGAMS', 'KOE113W', 'TAM464S', 'CAS150S', 'BROOUTE', 'ALUGLENS', 'FRABREN', 'SOU340N', 'HILTINS', 'STRHOVE', 'SAWCOPN', 'HAMWORN', 'DALDUBN', 'MCNCHEN', 'HILBEAS', 'NOROWEN', 'SOUTER2A', 'GENSHAN', 'VACLINIC', 'MORHEATE', 'KOEEDSW1', 'TRAMCKW', 'FAISOUN', 'SAWSAWN', 'CLIHOLE', 'CHAMARN', 'CLE24THN']
+        # sampledStopsList = ['MOREASS', 'HIGCOON', '4TH15TN', 'TREZOLS', 'KARPAUN', 'LIVGRAE', 'GRESHEW', 'MAIOHIW', 'AGL540W', 'WHIJAEE', '3RDCAMW', 'HARZETS', 'MAIBRICE', 'SAI2NDS', '3RDMAIS', 'STYCHAS', 'LOC230N', 'BETDIEW', 'STEMCCS', 'INNWESE', 'HANMAIN', 'HIGINDN', '4THCHIN', 'RIDSOME', 'KARHUYN', 'LIVBURE', 'LONWINE', 'MAICHAW', 'BROHAMIW', 'WHI3RDE', '1STLINW', 'MAINOEW', 'MAIIDLE', '5THCLEE', '3RDTOWS', 'STYGAMS', 'KOE113W', 'TAM464S', 'CAS150S', 'BROOUTE', 'ALUGLENS', 'FRABREN', 'SOU340N', 'HILTINS', 'STRHOVE', 'SAWCOPN', 'HAMWORN', 'DALDUBN', 'MCNCHEN', 'HILBEAS', 'NOROWEN', 'SOUTER2A', 'GENSHAN', 'VACLINIC', 'MORHEATE', 'KOEEDSW1', 'TRAMCKW', 'FAISOUN', 'SAWSAWN', 'CLIHOLE', 'CHAMARN', 'CLE24THN']
         
-        # # 2. Full stops
-        # db_GTFS = client.cota_gtfs
-        # col_stop = db_GTFS[gtfsSeconds + '_stops']
-        # rl_stop = list(col_stop.find({}))
-        # sampledStopsList = []
-        # for i in rl_stop:
-        #     sampledStopsList.append(i["stop_id"])
+        # 2. Full stops
+        db_GTFS = client.cota_gtfs
+        col_stop = db_GTFS[gtfsSeconds + '_stops']
+        rl_stop = list(col_stop.find({}))
+        sampledStopsList = []
+        for i in rl_stop:
+            sampledStopsList.append(i["stop_id"])
         
         # # 3. Sampled stops
         # dbStops = client.cota_gtfs[str(GTFSTimestamp) + "_stops"]
@@ -613,14 +612,14 @@ if __name__ == "__main__":
             #     continue
             args = [int(eachTimestamp), walkingDistanceLimit, timeDeltaLimit, walkingSpeed, scooterSpeed, scooterDistanceLimit, isRealTime, isScooter]
             
-            # resultsFeedback = collectiveAccessibilitySolve(args, sampledStopsList)
-            resultsFeedback = collectiveAccessibilitySolve(args, ["3RDCAMW"])
+            resultsFeedback = collectiveAccessibilitySolve(args, sampledStopsList)
+            # resultsFeedback = collectiveAccessibilitySolve(args, ["3RDCAMW"])
 
             # testStopID = "3RDCAMW"
             # resultsFeedback = singleAccessibilitySolve(args, testStopID)
             
             # print("eachTimestamp:", int(eachTimestamp), "results lens: ", len(resultsFeedback))
             print("******************", singleDate, eachTimestamp, "******************")
-            break
-        break
+            # break
+        # break
             

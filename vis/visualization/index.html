@@ -52,7 +52,7 @@
 			<div class="container-fluid">
 
 				<div class="navbar-header" id="mapheader">
-					<a class="navbar-brand mapheader" id="about-btn" href="#">Scooter Map</a>
+					<a class="navbar-brand mapheader" id="about-btn" href="#">Reliability Map</a>
 				</div>
 				<div class="navbar-collapse collapse">
 
@@ -140,8 +140,15 @@
 						aria-labelledby="headingOne0" style="margin:0">
 						<div class="panel-body">
 							<label for="fname">Stop:</label>
-							<input type="text" id="stop-input" name="fname"><br><br>
+							<input type="text" id="stop-input" name="fname" value="3RDMAIS"><br><br>
+							<label for="fname">Budget:</label>
+							<input type="text" id="budget-input" name="fname" value="30"><br><br>
+							<input type="checkbox" id="RT-checkbox" name="RT-checkbox" checked>
+							<label for="RT-checkbox"> Realtime</label><br>
+							<input type="checkbox" id="SC-checkbox" name="SC-checkbox" checked>
+							<label for="SC-checkbox"> Schedule</label><br>
 							<button type="button" id="show-travel-time-button">Show travel time</button>
+							<button type="button" id="stp-button">Show STP</button>
 						</div>
 					</div>
 					<div id="collapseOne0" class="panel-collapse collapse in" role="tabpanel"

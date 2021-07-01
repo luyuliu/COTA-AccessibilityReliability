@@ -45,7 +45,7 @@ function createCORSRequest(method, url) {
   return xhr;
 }
 
-function calculateDistance(self, latlng1, latlng2){
+function calculateDistance(self, latlng1, latlng2) {
   R = 6373
   lat1 = float(latlng1[0])
   lon1 = float(latlng1[1])
@@ -59,11 +59,11 @@ function calculateDistance(self, latlng1, latlng2){
   radlat2 = pi * lat2 / 180
 
   dist = Math.sin(radlat1) * Math.sin(radlat2) + Math.cos(radlat1) * Math.cos(radlat2) * Math.cos(radtheta)
-  try{
+  try {
     dist = Math.acos(dist)
   }
-  catch (err){
-        dist = 0
+  catch (err) {
+    dist = 0
   }
   dist = dist * 180 / pi * 60 * 1.1515 * 1609.344 / 1.4
 
@@ -412,8 +412,8 @@ $('#show-tragectory-button').click(function () {
         radius: 100,
         color: "red"
       }).addTo(map);
-``
-      marker.bindPopup(endPoint["receivingStopID"] + ", " +  (endPoint["timeRT"] + startTimestamp) + "," + "RT" + count)
+      ``
+      marker.bindPopup(endPoint["receivingStopID"] + ", " + (endPoint["timeRT"] + startTimestamp) + "," + "RT" + count)
 
       count++;
       if (count > 2000) {
@@ -455,9 +455,9 @@ $('#show-tragectory-button').click(function () {
       var marker = L.circle([endPoint["stop_lat"], endPoint["stop_lon"]], {
         radius: 80
       }).addTo(map);
-      
+
       marker.bindPopup(endPoint["receivingStopID"] + "," + (endPoint["timeSC"] + startTimestamp) + "," + "SC" + count)
-      
+
       count++;
       if (count > 2000) {
         break
@@ -557,4 +557,82 @@ $("#show-WATT-button").click(function () {
   });
   // }
 
+})
+
+var marker_list_RT = new Array();
+var marker_list_SC = new Array();
+
+$("#stp-button").click(function () {
+  var start_stop = $("#stop-input").val()
+  var queryURL = 'http://127.0.0.1:20190/20180201_1517490000?where={"startStopID":"' + start_stop + '"}';
+  var budget = $("#budget-input").val()
+
+  $.get(queryURL, function (raw) {
+    var stops = raw._items;
+    for (var i = 0; i < stops.length; i++) {
+      var stop = stops[i];
+      var speed = 1.4;
+      var actual_budget_RT = (budget * 60 - stop.timeRT) * speed; // meters
+      var actual_budget_SC = (budget * 60 - stop.timeSC) * speed; // meters
+
+      var limit = 700; // meters
+      if (actual_budget_RT > limit) {
+        actual_budget_RT = limit
+      }
+      if (actual_budget_RT < 0) {
+        actual_budget_RT = 0
+        continue
+      }
+      if (actual_budget_SC > limit) {
+        actual_budget_SC = limit
+      }
+      if (actual_budget_SC < 0) {
+        actual_budget_SC = 0
+        continue
+      }
+
+      var marker_RT = L.circle([stop.stop_lat, stop.stop_lon], {
+        color: "red",
+        radius: actual_budget_RT,
+        stroke: 0,
+        opacity: 1
+      }).addTo(map);
+      marker_list_RT.push(marker_RT)
+
+      var marker_SC = L.circle([stop.stop_lat, stop.stop_lon], {
+        color: "blue",
+        radius: actual_budget_SC,
+        stroke: 0,
+        opacity: 1
+      }).addTo(map);
+      marker_list_SC.push(marker_SC)
+
+
+    }
+  })
+
+})
+  
+$("#RT-checkbox").change(function () {
+  if (document.getElementById('RT-checkbox').checked) {
+    for (var i in marker_list_RT) {
+      map.addLayer(marker_list_RT[i])
+    }
+  } else {
+    for (var i in marker_list_RT) {
+      map.removeLayer(marker_list_RT[i])
+    }
+  }
+})
+
+$("#SC-checkbox").change(function () {
+  if (document.getElementById('SC-checkbox').checked) {
+    for (var i in marker_list_SC) {
+      map.addLayer(marker_list_SC[i])
+    }
+  } else {
+    for (var i in marker_list_SC) {
+      map.removeLayer(marker_list_SC[i])
+    }
+  }
 })

@@ -15,8 +15,8 @@ import transfer_tools
 client = MongoClient('mongodb://localhost:27017/')
 
 if __name__ == "__main__":
-    startDate = date(2019, 7, 1)
-    endDate = date(2019, 12, 18)
+    startDate = date(2018, 2, 1)
+    endDate = date(2020, 7, 1)
     daterange = (transfer_tools.daterange(startDate, endDate))
     numberOfTimeSamples = 1
 
@@ -50,29 +50,45 @@ if __name__ == "__main__":
 
         for i in [8, 12, 18]:
             todayTimestamp = (todaySeconds + i * 60*60/numberOfTimeSamples)
-            col_access = client.cota_access_rel["acc_" +
-                                                todayDate + "_" + str(int(todayTimestamp))]
-            print("acc_" + todayDate + "_" + str(int(todayTimestamp)))
+            col_access = client.cota_access_rel[todayDate + "_" + str(int(todayTimestamp))]
+            print(todayDate + "_" + str(int(todayTimestamp)))
             rl_access = col_access.find({})
             timeDic = {}
             for record in rl_access:
-                if record["visitTagSC"] == False: # NaN for scheduled.
+                if record["visitTagSC"] == False or record["receivingStopID"] == None: # NaN for scheduled.
                     continue
                 originStop = record["startStopID"]
                 destinationStop = record["receivingStopID"]
                 try:
                     timeDic[originStop]
                 except:
-                    rl_stop = db_stops.find_one({"stop_id": record["startStopID"]})
+                    rl_stop = db_stops.find_one({"stop_id": originStop})
                     timeDic[originStop] = {
-                        "stopID": record["startStopID"],
+                        "stopID": originStop,
                         "lat": rl_stop["stop_lat"],
                         "lon": rl_stop["stop_lon"],
                         "timeRT": 0,
                         "timeSC": 0,
                         "weight": 0,
-                        "count" : 0
+                        "count" : 0,
+                        "accessible_count": 0
                     }
+
+                try:
+                    timeDic[destinationStop]
+                except:
+                    rl_stop = db_stops.find_one({"stop_id": destinationStop})
+                    timeDic[destinationStop] = {
+                        "stopID": destinationStop,
+                        "lat": rl_stop["stop_lat"],
+                        "lon": rl_stop["stop_lon"],
+                        "timeRT": 0,
+                        "timeSC": 0,
+                        "weight": 0,
+                        "count" : 0,
+                        "accessible_count": 0
+                    }
+
                 try:
                     weight = weight_dic[originStop][destinationStop]
                 except:
@@ -81,6 +97,7 @@ if __name__ == "__main__":
                 timeDic[originStop]["timeSC"] += record["timeSC"] * weight
                 timeDic[originStop]["weight"] += weight
                 timeDic[originStop]["count"] += 1
+                timeDic[destinationStop]["accessible_count"] += 1 # The number of stops that can access this stop (origin stop)
             
             insertList = []
             for index, record in timeDic.items():
