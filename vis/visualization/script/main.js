@@ -355,7 +355,7 @@ $('#show-tragectory-button').click(function () {
   // var start_stop = "3RDMAIS"
   var end_stop = $("#end-stop-input").val();
   var startTimestamp = 1561982400
-  var queryURL = 'http://127.0.0.1:20196/acctest_20190701_1561982400?where={"startStopID":"' + start_stop + '"}';
+  var queryURL = 'http://127.0.0.1:20190/test_20180201_1517490000?where={"startStopID":"' + start_stop + '"}';
 
   $.get(queryURL, function (rawstops) {
     var stops = rawstops._items;
@@ -564,7 +564,7 @@ var marker_list_SC = new Array();
 
 $("#stp-button").click(function () {
   var start_stop = $("#stop-input").val()
-  var queryURL = 'http://127.0.0.1:20190/20180201_1517490000?where={"startStopID":"' + start_stop + '"}';
+  var queryURL = 'http://127.0.0.1:20190/acc_20190701_1561982400?where={"startStopID":"' + start_stop + '"}';
   var budget = $("#budget-input").val()
 
   $.get(queryURL, function (raw) {

@@ -545,7 +545,7 @@ def collectiveInsert(args, output):
     todayDate = curDate.strftime("%Y%m%d")
     recordCollection = []
 
-    col_access = client.cota_access_rel[todayDate + "_" +str(int(timestamp))]
+    col_access = client.cota_access_rel["test_" + todayDate + "_" +str(int(timestamp))]
 
     count = 0
     for eachVisitedSet in output:
@@ -585,23 +585,23 @@ if __name__ == "__main__":
         # 1. Sample stops list
         # sampledStopsList = ['MOREASS', 'HIGCOON', '4TH15TN', 'TREZOLS', 'KARPAUN', 'LIVGRAE', 'GRESHEW', 'MAIOHIW', 'AGL540W', 'WHIJAEE', '3RDCAMW', 'HARZETS', 'MAIBRICE', 'SAI2NDS', '3RDMAIS', 'STYCHAS', 'LOC230N', 'BETDIEW', 'STEMCCS', 'INNWESE', 'HANMAIN', 'HIGINDN', '4THCHIN', 'RIDSOME', 'KARHUYN', 'LIVBURE', 'LONWINE', 'MAICHAW', 'BROHAMIW', 'WHI3RDE', '1STLINW', 'MAINOEW', 'MAIIDLE', '5THCLEE', '3RDTOWS', 'STYGAMS', 'KOE113W', 'TAM464S', 'CAS150S', 'BROOUTE', 'ALUGLENS', 'FRABREN', 'SOU340N', 'HILTINS', 'STRHOVE', 'SAWCOPN', 'HAMWORN', 'DALDUBN', 'MCNCHEN', 'HILBEAS', 'NOROWEN', 'SOUTER2A', 'GENSHAN', 'VACLINIC', 'MORHEATE', 'KOEEDSW1', 'TRAMCKW', 'FAISOUN', 'SAWSAWN', 'CLIHOLE', 'CHAMARN', 'CLE24THN']
         
-        # 2. Full stops
-        db_GTFS = client.cota_gtfs
-        col_stop = db_GTFS[gtfsSeconds + '_stops']
-        rl_stop = list(col_stop.find({}))
-        sampledStopsList = []
-        for i in rl_stop:
-            sampledStopsList.append(i["stop_id"])
-        
-        # # 3. Sampled stops
-        # dbStops = client.cota_gtfs[str(GTFSTimestamp) + "_stops"]
-        # allStopsList = dbStops.find({})
+        # # 2. Full stops
+        # db_GTFS = client.cota_gtfs
+        # col_stop = db_GTFS[gtfsSeconds + '_stops']
+        # rl_stop = list(col_stop.find({}))
         # sampledStopsList = []
-        # sampler = 0
-        # for eachStops in allStopsList:
-        #     if sampler % sampleRate == 1:
-        #         sampledStopsList.append(eachStops["stop_id"])
-        #     sampler += 1
+        # for i in rl_stop:
+        #     sampledStopsList.append(i["stop_id"])
+        
+        # 3. Sampled stops
+        dbStops = client.cota_gtfs[str(GTFSTimestamp) + "_stops"]
+        allStopsList = dbStops.find({})
+        sampledStopsList = []
+        sampler = 0
+        for eachStops in allStopsList:
+            if sampler % sampleRate == 1:
+                sampledStopsList.append(eachStops["stop_id"])
+            sampler += 1
 
         todayTimestampList = []
         # for i in range(24*numberOfTimeSamples):
@@ -625,6 +625,6 @@ if __name__ == "__main__":
             
             # print("eachTimestamp:", int(eachTimestamp), "results lens: ", len(resultsFeedback))
             print("******************", singleDate, eachTimestamp, "******************")
-            # break
-        # break
+            break
+        break
             
