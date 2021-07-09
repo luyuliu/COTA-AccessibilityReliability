@@ -400,10 +400,10 @@ class DijkstraSolver(BasicSolver.BasicSolver):
             originalStrucuture["lastTripIDSC"] = travelTime["tripIDSC"]
             originalStrucuture["generatingStopIDSC"] = travelTime["generatingStopIDSC"]
         
-        if isRT: # Use a same field for the RT and SC, because RT is before SC in the extendStop
-            originalStrucuture["receivingStopID"] = travelTime["receivingStopIDRT"] 
-            originalStrucuture["stop_lat"] = self.stopsDic[travelTime["receivingStopIDRT"]]["stop_lat"]
-            originalStrucuture["stop_lon"] = self.stopsDic[travelTime["receivingStopIDRT"]]["stop_lon"]
+        # if isRT: # Use a same field for the RT and SC, because RT is before SC in the extendStop
+        #     originalStrucuture["receivingStopID"] = travelTime["receivingStopIDRT"] 
+        #     originalStrucuture["stop_lat"] = self.stopsDic[travelTime["receivingStopIDRT"]]["stop_lat"]
+        #     originalStrucuture["stop_lon"] = self.stopsDic[travelTime["receivingStopIDRT"]]["stop_lon"]
 
         return originalStrucuture
 
@@ -417,12 +417,12 @@ class DijkstraSolver(BasicSolver.BasicSolver):
             eachStopID = eachStop["stop_id"]
             self.visitedSet[eachStopID] = {
                 "startStopID": startStopID, # Origin stop
-                "receivingStopID": None, # Destination stop
+                "receivingStopID": eachStopID, # Destination stop
                 "timeRT": sys.maxsize,
                 "walkTimeRT": 0,
                 "busTimeRT": 0,
                 "waitTimeRT": 0,
-                "generatingStopIDRT": None,
+                "generatingStopIDRT": None, # The last visited stop by Real-time
                 "lastTripIDRT": None,
                 "lastTripTypeRT": None,
                 "transferCountRT": 0,
@@ -435,7 +435,9 @@ class DijkstraSolver(BasicSolver.BasicSolver):
                 "lastTripIDSC": None,
                 "lastTripTypeSC": None,
                 "transferCountSC": 0,
-                "visitTagSC": False
+                "visitTagSC": False,
+                "stop_lat": self.stopsDic[eachStopID]["stop_lat"],
+                "stop_lon": self.stopsDic[eachStopID]["stop_lon"]
             }
 
         self.visitedSet[startStopID]["timeRT"] = 0 # initialization
