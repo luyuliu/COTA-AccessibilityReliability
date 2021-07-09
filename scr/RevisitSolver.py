@@ -1,4 +1,5 @@
 
+
 import sys
 import os
 import time
@@ -21,24 +22,30 @@ db_real_time = client.cota_real_time
 
 def revisit(lastMiddleStopID, thisMiddleStopID, originStopID, eachTimestamp, accessDic, arcsDicRT):
     # Revisited Stop's time
-    lastTimeRV = accessDic[originStopID][lastMiddleStopID]["timeRV"]
-    if lastTimeRV == False: # There is no path to the last stop, so the rest of the path will be nonexisting.
-        accessDic[originStopID][thisMiddleStopID]["timeRV"] = False
-        accessDic[originStopID][thisMiddleStopID]["waitTimeRV"] = False
-        accessDic[originStopID][thisMiddleStopID]["busTimeRV"] = False
-        accessDic[originStopID][thisMiddleStopID]["lastTripIDRV"] = False
-        return False
+    lastTimeRVa = accessDic[originStopID][lastMiddleStopID]
+    lastTimeRV = lastTimeRVa["timeRV"]
+    # if lastTimeRV == False: # There is no path to the last stop, so the rest of the path will be nonexisting.
+    #     accessDic[originStopID][thisMiddleStopID]["timeRV"] = False
+    #     accessDic[originStopID][thisMiddleStopID]["waitTimeRV"] = False
+    #     accessDic[originStopID][thisMiddleStopID]["busTimeRV"] = False
+    #     accessDic[originStopID][thisMiddleStopID]["lastTripIDRV"] = False
+    #     return False
+
     lastTime = lastTimeRV + eachTimestamp
     # Should be always consistent with RV
     thisTripTypeSC = accessDic[originStopID][thisMiddleStopID]["lastTripTypeSC"]
     # lastTripTypeSC = accessDic[originStopID][lastMiddleStopID]["lastTripTypeSC"]
 
-    accessDic[originStopID][thisMiddleStopID]["walkTimeRV"] = accessDic[originStopID][lastMiddleStopID]["walkTimeSC"]
+    # Walk time stays the same
+    accessDic[originStopID][thisMiddleStopID]["walkTimeRV"] = accessDic[originStopID][thisMiddleStopID]["walkTimeSC"]
 
     if thisTripTypeSC == "walk":
-        accessDic[originStopID][thisMiddleStopID]["timeRV"] = accessDic[originStopID][lastMiddleStopID]["timeSC"]
-        accessDic[originStopID][thisMiddleStopID]["waitTimeRV"] = 0
-        accessDic[originStopID][thisMiddleStopID]["busTimeRV"] = 0
+        accessDic[originStopID][thisMiddleStopID]["timeRV"] = accessDic[originStopID][lastMiddleStopID]["timeRV"] + \
+            accessDic[originStopID][thisMiddleStopID]["walkTimeSC"] - \
+            accessDic[originStopID][lastMiddleStopID]["walkTimeSC"]
+        accessDic[originStopID][thisMiddleStopID]["waitTimeRV"] = accessDic[originStopID][lastMiddleStopID]["waitTimeRV"]
+        accessDic[originStopID][thisMiddleStopID]["busTimeRV"] = accessDic[originStopID][lastMiddleStopID]["busTimeRV"]
+
     else:  # "bus"
         try:
             arcsList = arcsDicRT[lastMiddleStopID][thisMiddleStopID]
@@ -48,18 +55,43 @@ def revisit(lastMiddleStopID, thisMiddleStopID, originStopID, eachTimestamp, acc
             accessDic[originStopID][thisMiddleStopID]["busTimeRV"] = False
             accessDic[originStopID][thisMiddleStopID]["lastTripIDRV"] = False
             return False
+        else:
+            pass
+
+        thisTimeRV = None
+        thisWaitTimeRV = None
+        thisBusTimeRV = None
+        thisLastTripIDRV = None
         for timeGen, eachArc in arcsList.items():
             if timeGen >= lastTime:  # arrival time is earlier than the generating time in the thisMiddleStopID
-                accessDic[originStopID][thisMiddleStopID]["timeRV"] = eachArc["time_rec"] - lastTime
-                accessDic[originStopID][thisMiddleStopID]["waitTimeRV"] = timeGen - lastTime
-                accessDic[originStopID][thisMiddleStopID]["busTimeRV"] = eachArc["bus_time"]
-                accessDic[originStopID][thisMiddleStopID]["lastTripIDRV"] = eachArc["trip_id"]
+                thisTimeRV = eachArc["time_rec"] - lastTime
+                thisWaitTimeRV = timeGen - lastTime
+                thisBusTimeRV = eachArc["bus_time"]
+                thisLastTripIDRV = eachArc["trip_id"]
                 break
-    
+        if thisTimeRV != None:
+            lastTimeRV = accessDic[originStopID][lastMiddleStopID]["timeRV"]
+            lastWaitTimeRV = accessDic[originStopID][lastMiddleStopID]["waitTimeRV"] 
+            lastBusTimeRV = accessDic[originStopID][lastMiddleStopID]["busTimeRV"]
+            accessDic[originStopID][thisMiddleStopID]["timeRV"] = lastTimeRV + thisTimeRV
+            accessDic[originStopID][thisMiddleStopID]["waitTimeRV"] = lastWaitTimeRV + thisWaitTimeRV
+            accessDic[originStopID][thisMiddleStopID]["busTimeRV"] = lastBusTimeRV + thisBusTimeRV
+            accessDic[originStopID][thisMiddleStopID]["lastTripIDRV"] = thisLastTripIDRV
+        else:
+            accessDic[originStopID][thisMiddleStopID]["timeRV"] = False
+            accessDic[originStopID][thisMiddleStopID]["waitTimeRV"] = False
+            accessDic[originStopID][thisMiddleStopID]["busTimeRV"] = False
+            accessDic[originStopID][thisMiddleStopID]["walkTimeRV"] = False
+            accessDic[originStopID][thisMiddleStopID]["lastTripIDRV"] = False
+
+
     # if accessDic[originStopID][thisMiddleStopID]["timeRV"] > 2000:
     #     print(thisTripTypeSC, originStopID, accessDic[originStopID][thisMiddleStopID]["timeRV"], accessDic[originStopID][thisMiddleStopID]["timeSC"])
     #     for timeGen, eachArc in arcsList.items():
     #         print(lastTime, timeGen, eachArc["time_gen_S"])
+    
+    if lastMiddleStopID == "FREOAKE" and thisMiddleStopID == "FRESTUW":
+        a = 1
     accessDic[originStopID][thisMiddleStopID]["revisitTag"] = True
     return accessDic[originStopID][thisMiddleStopID]["timeRV"]
 
@@ -70,7 +102,7 @@ def revisitSolver():
     # startDate = date(2019, 7, 1)
     endDate = date(2020, 7, 1)
     walkingDistanceLimit = 700
-    timeDeltaLimit = 240 * 60
+    timeDeltaLimit = 480 * 60
     walkingSpeed = 1.4
     sampleRate = 20
     daterange = (transfer_tools.daterange(startDate, endDate))
@@ -93,11 +125,14 @@ def revisitSolver():
             col_real_times = db_real_time["R" + todayDate]
             rl_stop_times_rt = list(col_real_times.find(
                 {"time": {"$gt": eachTimestamp, "$lt": eachTimestamp + timeDeltaLimit}}))  # Real-time
+            rl_stops = col_stops.find({})
 
             stopsDic = {}
             timeListByStopRT = {}
             timeListByTripRT = {}
             arcsDicRT = {}
+            for eachStop in rl_stops:
+                stopsDic[eachStop["stop_id"]] = eachStop
 
             for eachTime in rl_stop_times_rt:
                 stopID = eachTime["stop_id"]
@@ -132,8 +167,8 @@ def revisitSolver():
                     except:
                         arcsDicRT[generatingStopID][receivingStopID] = {}
 
-                    timeGen = eachTrip[index]["time"] # RT time
-                    timeRec = eachTrip[index + 1]["time"] # RT time
+                    timeGen = eachTrip[index]["time"]  # RT time
+                    timeRec = eachTrip[index + 1]["time"]  # RT time
                     timeGenS = eachTrip[index]["scheduled_time"]
                     timeRecS = eachTrip[index + 1]["scheduled_time"]
 
@@ -161,9 +196,9 @@ def revisitSolver():
                 destinationStopID = eachOD["receivingStopID"]
                 if destinationStopID == None:
                     destinationStopID = originStopID
-                
-                if eachOD["timeRT"] > 99999 or eachOD["timeSC"] > 99999:
-                    continue
+
+                # if eachOD["timeRT"] > 99999 or eachOD["timeSC"] > 99999:
+                #     continue
 
                 try:
                     accessDic[originStopID]
@@ -202,16 +237,14 @@ def revisitSolver():
                         "lastTripIDSC": None,
                         "lastTripTypeSC": None,
                         "transferCountSC": 0,
-                        "visitTagSC": True,
-                        "stop_lat": None,
-                        "stop_lon": None
+                        "visitTagSC": True
                     }
-                
+
                 try:
                     accessDic[originStopID][originStopID]["stop_lat"]
                 except:
-                    accessDic[originStopID][originStopID]["stop_lat"] = None
-                    accessDic[originStopID][originStopID]["stop_lon"] = None
+                    accessDic[originStopID][originStopID]["stop_lat"] = stopsDic[originStopID]["stop_lat"]
+                    accessDic[originStopID][originStopID]["stop_lon"] = stopsDic[originStopID]["stop_lon"]
 
                 # Initialization
                 accessDic[originStopID][originStopID]["revisitTag"] = True
@@ -223,8 +256,12 @@ def revisitSolver():
                 for destinationStopID, eachOD in ODs.items():
                     lastStopID = destinationStopID
 
+                    if accessDic[originStopID][lastStopID]["generatingStopIDSC"] == None: # There is no link between the origin and this destination according to schedule.
+                        continue
+
                     trajectoryList = []  # Store the stopIDs that have not been revisited along the trajectory
                     trajectoryDebugList = []
+
                     while(lastStopID != originStopID):
                         thisRevisitTag = accessDic[originStopID][lastStopID]["revisitTag"]
                         if thisRevisitTag == True:  # the previous stop has been revisited.
@@ -239,24 +276,32 @@ def revisitSolver():
                         lastMiddleStopID = accessDic[originStopID][thisMiddleStopID]["generatingStopIDSC"]
 
                         # Revisit the link between the two sebsequent stops
+
+                        # Debug
                         
+                        if thisMiddleStopID == "LOCMARS" and lastMiddleStopID == "FRESTUW":
+                            a = 1
                         timeRV = revisit(lastMiddleStopID, thisMiddleStopID,
-                                originStopID, eachTimestamp, accessDic, arcsDicRT)
+                                         originStopID, eachTimestamp, accessDic, arcsDicRT)
+                        try:
+                            trajectoryDebugList[thisMiddleStopIDIndex] = [int(accessDic[originStopID][thisMiddleStopID]["timeRV"]), int(accessDic[originStopID][thisMiddleStopID]["walkTimeRV"]), int(
+                                accessDic[originStopID][thisMiddleStopID]["waitTimeRV"]), int(accessDic[originStopID][thisMiddleStopID]["busTimeRV"]), int(accessDic[originStopID][thisMiddleStopID]["timeSC"]), int(accessDic[originStopID][thisMiddleStopID]["walkTimeSC"]), int(
+                                accessDic[originStopID][thisMiddleStopID]["waitTimeSC"]), int(accessDic[originStopID][thisMiddleStopID]["busTimeSC"])]
+                        except:
+                            pass
                         
-                        trajectoryDebugList[thisMiddleStopIDIndex] = timeRV
-                        
+
                         # lastTimeRV = accessDic[originStopID][lastMiddleStopID]["timeRV"]
                         # thisTripTypeSC = accessDic[originStopID][thisMiddleStopID]["lastTripTypeSC"]
                         # print(lastMiddleStopID, lastTimeRV, thisTripTypeSC)
-                        
-                        
+                    a = 1
 
             insertList = []
             for originStopID, ODs in accessDic.items():
                 for destinationStopID, eachOD in ODs.items():
                     insertList.append(eachOD)
             client.cota_access_rev[todayDate + "_" +
-                                   str(eachTimestamp)].insert_many(insertList)
+                                   str(int(eachTimestamp))].insert_many(insertList)
             print("-----", todayDate, "-----",
                   int(eachTimestamp), "-----", len(insertList))
 
