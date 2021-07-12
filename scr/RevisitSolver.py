@@ -22,14 +22,17 @@ db_real_time = client.cota_real_time
 
 def revisit(lastMiddleStopID, thisMiddleStopID, originStopID, eachTimestamp, accessDic, arcsDicRT):
     # Revisited Stop's time
-    lastTimeRVa = accessDic[originStopID][lastMiddleStopID]
-    lastTimeRV = lastTimeRVa["timeRV"]
-    # if lastTimeRV == False: # There is no path to the last stop, so the rest of the path will be nonexisting.
-    #     accessDic[originStopID][thisMiddleStopID]["timeRV"] = False
-    #     accessDic[originStopID][thisMiddleStopID]["waitTimeRV"] = False
-    #     accessDic[originStopID][thisMiddleStopID]["busTimeRV"] = False
-    #     accessDic[originStopID][thisMiddleStopID]["lastTripIDRV"] = False
-    #     return False
+    try:
+        lastTimeRVa = accessDic[originStopID][lastMiddleStopID]
+        lastTimeRV = lastTimeRVa["timeRV"]
+    except:
+        lastTimeRV = False
+    if lastTimeRV == False: # There is no path to the last stop, so the rest of the path will be nonexisting.
+        accessDic[originStopID][thisMiddleStopID]["timeRV"] = False
+        accessDic[originStopID][thisMiddleStopID]["waitTimeRV"] = False
+        accessDic[originStopID][thisMiddleStopID]["busTimeRV"] = False
+        accessDic[originStopID][thisMiddleStopID]["lastTripIDRV"] = False
+        return False
 
     lastTime = lastTimeRV + eachTimestamp
     # Should be always consistent with RV
@@ -126,6 +129,10 @@ def revisitSolver():
             rl_stop_times_rt = list(col_real_times.find(
                 {"time": {"$gt": eachTimestamp, "$lt": eachTimestamp + timeDeltaLimit}}))  # Real-time
             rl_stops = col_stops.find({})
+            
+            accessDic = {}
+            col_access = db_access[todayDate + "_" + str(int(eachTimestamp))]
+            rl_access = (col_access.find({}))
 
             stopsDic = {}
             timeListByStopRT = {}
@@ -186,10 +193,6 @@ def revisitSolver():
                     arcsDicRT[startStopID][endStopID] = OrderedDict(
                         sorted(endStop.items(), key=return_time_gen))
 
-            accessDic = {}
-            col_access = db_access["test_" +
-                                   todayDate + "_" + str(int(eachTimestamp))]
-            rl_access = (col_access.find({}))
 
             for eachOD in tqdm(rl_access):
                 originStopID = eachOD["startStopID"]
@@ -255,7 +258,8 @@ def revisitSolver():
 
                 for destinationStopID, eachOD in ODs.items():
                     lastStopID = destinationStopID
-
+                    if lastStopID == None:
+                        continue
                     if accessDic[originStopID][lastStopID]["generatingStopIDSC"] == None: # There is no link between the origin and this destination according to schedule.
                         continue
 
@@ -263,7 +267,10 @@ def revisitSolver():
                     trajectoryDebugList = []
 
                     while(lastStopID != originStopID):
-                        thisRevisitTag = accessDic[originStopID][lastStopID]["revisitTag"]
+                        try:
+                            thisRevisitTag = accessDic[originStopID][lastStopID]["revisitTag"]
+                        except:
+                            break
                         if thisRevisitTag == True:  # the previous stop has been revisited.
                             break
                         trajectoryList.insert(0, lastStopID)
