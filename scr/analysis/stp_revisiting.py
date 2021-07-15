@@ -33,10 +33,9 @@ if __name__ == "__main__":
             todayTimestamp = (todaySeconds + i * 60*60/numberOfTimeSamples)
             col_access = client.cota_access_rev[todayDate + "_" + str(int(todayTimestamp))]
             print(todayDate + "_" + str(int(todayTimestamp)))
-            rl_access = list(col_access.find({}))
-            print(len(rl_access))
+            rl_access = (col_access.find({}))
             timeDic = {}
-            for record in rl_access:
+            for record in tqdm(rl_access):
                 if record["visitTagSC"] == False or record["receivingStopID"] == None: # NaN for scheduled.
                     continue
                 originStop = record["startStopID"]
@@ -49,6 +48,8 @@ if __name__ == "__main__":
                         "stopID": originStop,
                         "lat": rl_stop["stop_lat"],
                         "lon": rl_stop["stop_lon"],
+                        "errorRV": 0,
+                        "errorSC": 0
                     }
                     for budget in budgetList:
                         timeDic[originStop]["countRV_" + str(budget)] = 0
@@ -56,19 +57,33 @@ if __name__ == "__main__":
 
                 timeRT = record["timeRV"]
                 timeSC = record["timeSC"]
-                for budget in budgetList:
-                    if timeRT < budget * 60: # If travel time between the stops are smaller than the budget, then it's accessible 
-                        timeDic[originStop]["countRV_" + str(budget)] += 1
-                    if timeSC < budget * 60:
-                        timeDic[originStop]["countSC_" + str(budget)] += 1
+                if timeRT == None:
+                    timeDic[originStop]["countRV_" + str(budget)]
+                else:
+                    for budget in budgetList:
+                        if timeRT < budget * 60: # If travel time between the stops are smaller than the budget, then it's accessible 
+                            timeDic[originStop]["countRV_" + str(budget)] += 1
 
+                if timeSC == None:
+                    timeDic[originStop]["countSC_" + str(budget)]
+                else:
+                    for budget in budgetList:
+                        if timeSC < budget * 60:
+                            timeDic[originStop]["countSC_" + str(budget)] += 1
+                # print(len(timeDic.items()))
+            print(timeDic)
             insertList = []
             for index, record in timeDic.items():
+                # print(record)
                 insertList.append(record)
+
+            # print((insertList), len(timeDic.items()))
             
             client.cota_access_agg["stpRV_" + todayDate + "_" + str(int(todayTimestamp))].drop()
             client.cota_access_agg["stpRV_" + todayDate + "_" + str(int(todayTimestamp))].insert_many(insertList)
             print("---------------", todayDate, i, "---------------")
+            break
+        break
             # print(timeDic)
             
 

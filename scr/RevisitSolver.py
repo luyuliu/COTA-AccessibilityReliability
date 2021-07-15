@@ -22,17 +22,18 @@ db_real_time = client.cota_real_time
 
 def revisit(lastMiddleStopID, thisMiddleStopID, originStopID, eachTimestamp, accessDic, arcsDicRT):
     # Revisited Stop's time
+    a = 1
     try:
         lastTimeRVa = accessDic[originStopID][lastMiddleStopID]
         lastTimeRV = lastTimeRVa["timeRV"]
     except:
-        lastTimeRV = False
-    if lastTimeRV == False: # There is no path to the last stop, so the rest of the path will be nonexisting.
-        accessDic[originStopID][thisMiddleStopID]["timeRV"] = False
-        accessDic[originStopID][thisMiddleStopID]["waitTimeRV"] = False
-        accessDic[originStopID][thisMiddleStopID]["busTimeRV"] = False
-        accessDic[originStopID][thisMiddleStopID]["lastTripIDRV"] = False
-        return False
+        lastTimeRV = None
+    if lastTimeRV == None: # There is no path to the last stop, so the rest of the path will be nonexisting.
+        accessDic[originStopID][thisMiddleStopID]["timeRV"] = None
+        accessDic[originStopID][thisMiddleStopID]["waitTimeRV"] = None
+        accessDic[originStopID][thisMiddleStopID]["busTimeRV"] = None
+        accessDic[originStopID][thisMiddleStopID]["lastTripIDRV"] = None
+        return None
 
     lastTime = lastTimeRV + eachTimestamp
     # Should be always consistent with RV
@@ -53,11 +54,11 @@ def revisit(lastMiddleStopID, thisMiddleStopID, originStopID, eachTimestamp, acc
         try:
             arcsList = arcsDicRT[lastMiddleStopID][thisMiddleStopID]
         except:
-            accessDic[originStopID][thisMiddleStopID]["timeRV"] = False
-            accessDic[originStopID][thisMiddleStopID]["waitTimeRV"] = False
-            accessDic[originStopID][thisMiddleStopID]["busTimeRV"] = False
-            accessDic[originStopID][thisMiddleStopID]["lastTripIDRV"] = False
-            return False
+            accessDic[originStopID][thisMiddleStopID]["timeRV"] = None
+            accessDic[originStopID][thisMiddleStopID]["waitTimeRV"] = None
+            accessDic[originStopID][thisMiddleStopID]["busTimeRV"] = None
+            accessDic[originStopID][thisMiddleStopID]["lastTripIDRV"] = None
+            return None
         else:
             pass
 
@@ -81,11 +82,11 @@ def revisit(lastMiddleStopID, thisMiddleStopID, originStopID, eachTimestamp, acc
             accessDic[originStopID][thisMiddleStopID]["busTimeRV"] = lastBusTimeRV + thisBusTimeRV
             accessDic[originStopID][thisMiddleStopID]["lastTripIDRV"] = thisLastTripIDRV
         else:
-            accessDic[originStopID][thisMiddleStopID]["timeRV"] = False
-            accessDic[originStopID][thisMiddleStopID]["waitTimeRV"] = False
-            accessDic[originStopID][thisMiddleStopID]["busTimeRV"] = False
-            accessDic[originStopID][thisMiddleStopID]["walkTimeRV"] = False
-            accessDic[originStopID][thisMiddleStopID]["lastTripIDRV"] = False
+            accessDic[originStopID][thisMiddleStopID]["timeRV"] = None
+            accessDic[originStopID][thisMiddleStopID]["waitTimeRV"] = None
+            accessDic[originStopID][thisMiddleStopID]["busTimeRV"] = None
+            accessDic[originStopID][thisMiddleStopID]["walkTimeRV"] = None
+            accessDic[originStopID][thisMiddleStopID]["lastTripIDRV"] = None
 
 
     # if accessDic[originStopID][thisMiddleStopID]["timeRV"] > 2000:

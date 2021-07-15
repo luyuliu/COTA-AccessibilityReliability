@@ -564,7 +564,8 @@ def collectiveInsert(args, output):
 if __name__ == "__main__":
     basicSolver = BasicSolver.BasicSolver()
     # startDate = date(2019, 6, 20)
-    startDate = date(2018, 2, 25)
+    # startDate = date(2018, 2, 25)
+    startDate = date(2018, 5, 9)
     endDate = date(2020, 7, 1)
     walkingDistanceLimit = 700
     timeDeltaLimit = 180 * 60
