@@ -104,6 +104,8 @@ def revisitSolver():
     db_access = client.cota_access_rel
     startDate = date(2018, 2, 1)
     # startDate = date(2019, 7, 1)
+    startDate = date(2018, 3, 1)
+    startDate = date(2018, 3, 8)
     endDate = date(2020, 7, 1)
     walkingDistanceLimit = 700
     timeDeltaLimit = 480 * 60
@@ -112,6 +114,9 @@ def revisitSolver():
     daterange = (transfer_tools.daterange(startDate, endDate))
 
     for singleDate in (daterange):
+        weekday = singleDate.weekday()
+        if weekday != 2:
+            continue
         todayDate = singleDate.strftime("%Y%m%d")
         GTFSTimestamp = transfer_tools.find_gtfs_time_stamp(singleDate)
         todaySeconds = atime.mktime(singleDate.timetuple())
@@ -132,7 +137,7 @@ def revisitSolver():
             rl_stops = col_stops.find({})
             
             accessDic = {}
-            col_access = db_access[todayDate + "_" + str(int(eachTimestamp))]
+            col_access = db_access["rel_" + todayDate + "_" + str(int(eachTimestamp))]
             rl_access = (col_access.find({}))
 
             stopsDic = {}
@@ -314,7 +319,7 @@ def revisitSolver():
                   int(eachTimestamp), "-----", len(insertList))
 
             break
-        break
+        # break
 
 
 if __name__ == "__main__":

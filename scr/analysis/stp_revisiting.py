@@ -16,6 +16,7 @@ client = MongoClient('mongodb://localhost:27017/')
 
 if __name__ == "__main__":
     startDate = date(2018, 2, 1)
+    startDate = date(2018, 3, 8)
     endDate = date(2020, 7, 1)
     daterange = (transfer_tools.daterange(startDate, endDate))
     numberOfTimeSamples = 1
@@ -23,6 +24,9 @@ if __name__ == "__main__":
     budgetList = [i for i in range(0, 121, 5)]
 
     for singleDate in (daterange):
+        weekday = singleDate.weekday()
+        if weekday != 2:
+            continue
         todayDate = singleDate.strftime("%Y%m%d")
         GTFSTimestamp = transfer_tools.find_gtfs_time_stamp(singleDate)
         todaySeconds = atime.mktime(singleDate.timetuple())
@@ -83,7 +87,7 @@ if __name__ == "__main__":
             client.cota_access_agg["stpRV_" + todayDate + "_" + str(int(todayTimestamp))].insert_many(insertList)
             print("---------------", todayDate, i, "---------------")
             break
-        break
+        # break
             # print(timeDic)
             
 
