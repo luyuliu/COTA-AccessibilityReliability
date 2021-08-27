@@ -400,10 +400,10 @@ class DijkstraSolver(BasicSolver.BasicSolver):
             originalStrucuture["lastTripIDSC"] = travelTime["tripIDSC"]
             originalStrucuture["generatingStopIDSC"] = travelTime["generatingStopIDSC"]
         
-        # if isRT: # Use a same field for the RT and SC, because RT is before SC in the extendStop
-        #     originalStrucuture["receivingStopID"] = travelTime["receivingStopIDRT"] 
-        #     originalStrucuture["stop_lat"] = self.stopsDic[travelTime["receivingStopIDRT"]]["stop_lat"]
-        #     originalStrucuture["stop_lon"] = self.stopsDic[travelTime["receivingStopIDRT"]]["stop_lon"]
+        if isRT: # Use a same field for the RT and SC, because RT is before SC in the extendStop
+            originalStrucuture["receivingStopID"] = travelTime["receivingStopIDRT"] 
+            originalStrucuture["stop_lat"] = self.stopsDic[travelTime["receivingStopIDRT"]]["stop_lat"]
+            originalStrucuture["stop_lon"] = self.stopsDic[travelTime["receivingStopIDRT"]]["stop_lon"]
 
         return originalStrucuture
 
@@ -417,12 +417,12 @@ class DijkstraSolver(BasicSolver.BasicSolver):
             eachStopID = eachStop["stop_id"]
             self.visitedSet[eachStopID] = {
                 "startStopID": startStopID, # Origin stop
-                "receivingStopID": eachStopID, # Destination stop
+                "receivingStopID": None, # Destination stop
                 "timeRT": sys.maxsize,
                 "walkTimeRT": 0,
                 "busTimeRT": 0,
                 "waitTimeRT": 0,
-                "generatingStopIDRT": None, # The last visited stop by Real-time
+                "generatingStopIDRT": None,
                 "lastTripIDRT": None,
                 "lastTripTypeRT": None,
                 "transferCountRT": 0,
@@ -435,9 +435,7 @@ class DijkstraSolver(BasicSolver.BasicSolver):
                 "lastTripIDSC": None,
                 "lastTripTypeSC": None,
                 "transferCountSC": 0,
-                "visitTagSC": False,
-                "stop_lat": self.stopsDic[eachStopID]["stop_lat"],
-                "stop_lon": self.stopsDic[eachStopID]["stop_lon"]
+                "visitTagSC": False
             }
 
         self.visitedSet[startStopID]["timeRT"] = 0 # initialization
@@ -547,7 +545,7 @@ def collectiveInsert(args, output):
     todayDate = curDate.strftime("%Y%m%d")
     recordCollection = []
 
-    col_access = client.cota_access_rel["rel_" + todayDate + "_" +str(int(timestamp))]
+    col_access = client.cota_access_rel[todayDate + "_" +str(int(timestamp))]
 
     count = 0
     for eachVisitedSet in output:
@@ -564,12 +562,10 @@ def collectiveInsert(args, output):
 if __name__ == "__main__":
     basicSolver = BasicSolver.BasicSolver()
     # startDate = date(2019, 6, 20)
-    # startDate = date(2018, 2, 25)
-    startDate = date(2018, 5, 9)
-    startDate = date(2019, 2, 1)
+    startDate = date(2018, 2, 1)
     endDate = date(2020, 7, 1)
     walkingDistanceLimit = 700
-    timeDeltaLimit = 180 * 60
+    timeDeltaLimit = 150 * 60
     walkingSpeed = 1.4
     scooterSpeed = 4.47  # 10 mph
     scooterDistanceLimit = (5-1)/0.32*4.47*60 # 5 dollar 
@@ -582,9 +578,6 @@ if __name__ == "__main__":
     
         
     for singleDate in (daterange):
-        weekday = singleDate.weekday()
-        if weekday != 2:
-            continue
         GTFSTimestamp = basicSolver.find_gtfs_time_stamp(singleDate)
         todaySeconds = atime.mktime(singleDate.timetuple())
         gtfsSeconds = str(transfer_tools.find_gtfs_time_stamp(singleDate))
@@ -632,6 +625,6 @@ if __name__ == "__main__":
             
             # print("eachTimestamp:", int(eachTimestamp), "results lens: ", len(resultsFeedback))
             print("******************", singleDate, eachTimestamp, "******************")
-        #     break
+            # break
         # break
             

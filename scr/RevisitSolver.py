@@ -102,10 +102,10 @@ def revisit(lastMiddleStopID, thisMiddleStopID, originStopID, eachTimestamp, acc
 
 def revisitSolver():
     db_access = client.cota_access_rel
-    startDate = date(2018, 2, 1)
-    # startDate = date(2019, 7, 1)
-    startDate = date(2018, 3, 1)
-    startDate = date(2018, 3, 8)
+    startDate = date(2018, 2, 2)
+    # # startDate = date(2019, 7, 1)
+    # startDate = date(2018, 2, 26)
+    # startDate = date(2018, 3, 8)
     endDate = date(2020, 7, 1)
     walkingDistanceLimit = 700
     timeDeltaLimit = 480 * 60
@@ -318,7 +318,7 @@ def revisitSolver():
             print("-----", todayDate, "-----",
                   int(eachTimestamp), "-----", len(insertList))
 
-            break
+            # break
         # break
 
 
