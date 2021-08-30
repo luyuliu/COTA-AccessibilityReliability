@@ -1,4 +1,6 @@
-
+# Revisit the posteriori OD records and find the actual priori performance.
+# The reason to revisit the posteriori OD records: Priori route will be always consistent with schedule-based route.
+# The results will look similar to DijkstraSolver. Only difference is RV, which represent the priori version of the real-time.
 
 import sys
 import os

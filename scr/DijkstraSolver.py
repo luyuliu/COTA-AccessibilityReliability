@@ -574,8 +574,8 @@ if __name__ == "__main__":
     # startDate = date(2018, 2, 25)
     startDate = date(2018, 5, 9)
     startDate = date(2019, 4, 11)
-    startDate = date(2020, 2, 11)
-    endDate = date(2020, 7, 1)
+    startDate = date(2018, 8, 1)
+    endDate = date(2019, 2, 5)
     walkingDistanceLimit = 700
     timeDeltaLimit = 180 * 60
     walkingSpeed = 1.4
@@ -628,8 +628,8 @@ if __name__ == "__main__":
         # print("Date: ", singleDate, "; Stops: ", len(sampledStopsList))
         # todayTimestampList = [todaySeconds + 28800, todaySeconds + 46800, todaySeconds + 64800]
         for eachTimestamp in todayTimestampList:
-            if eachTimestamp < 1583964000: # Restart point
-                continue
+            # if eachTimestamp < 1583964000: # Restart point
+            #     continue
             # if eachTimestamp != 1563192000: # debug and restart
             #     continue
             args = [int(eachTimestamp), walkingDistanceLimit, timeDeltaLimit, walkingSpeed, scooterSpeed, scooterDistanceLimit, isRealTime, isScooter]
