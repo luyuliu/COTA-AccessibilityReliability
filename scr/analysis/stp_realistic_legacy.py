@@ -1,4 +1,4 @@
-# Aggregate the revisited OD records into priori STP. Need to first run 1) Dijkstra Solver and 2) RevisitSolver 
+# Aggregate the revisited OD records into realistic STP. Need to first run 1) Dijkstra Solver and 2) RevisitSolver 
 import sys
 import os
 import time

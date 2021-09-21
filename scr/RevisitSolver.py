@@ -2,6 +2,8 @@
 # The reason to revisit the posteriori OD records: Priori route will be always consistent with schedule-based route.
 # The results will look similar to DijkstraSolver. Only difference is RV, which represent the priori version of the real-time.
 
+# The code is not parallelized because the memory cost is too large and it is running pretty fast compared to DijkstraSolver.
+
 import sys
 import os
 import time
@@ -104,13 +106,15 @@ def revisit(lastMiddleStopID, thisMiddleStopID, originStopID, eachTimestamp, acc
 
 def revisitSolver():
     db_access = client.cota_access_rel
-    startDate = date(2018, 2, 2)
+    startDate = date(2018, 3, 15)
     # # startDate = date(2019, 7, 1)
     # startDate = date(2018, 2, 26)
     # startDate = date(2018, 3, 8)
-    endDate = date(2020, 7, 1)
+    endDate = date(2019, 2, 5)
+    startDate = date(2018, 5, 9)
+    endDate = date(2019, 2, 5)
     walkingDistanceLimit = 700
-    timeDeltaLimit = 480 * 60
+    timeDeltaLimit = 480 * 60 # Extend the query limit to guarantee there is no missing trips, because there will be a lot of missing trips.
     walkingSpeed = 1.4
     sampleRate = 20
     daterange = (transfer_tools.daterange(startDate, endDate))
@@ -129,6 +133,8 @@ def revisitSolver():
             todayTimestampList.append(todaySeconds + i * 60*60)
 
         for eachTimestamp in todayTimestampList:
+            if eachTimestamp < 1542214800: # Restart point
+                continue
             print("-----", todayDate, "-----",
                   int(eachTimestamp), "----- Start")
             col_stops = db_GTFS[str(GTFSTimestamp) + "_stops"]
@@ -294,8 +300,6 @@ def revisitSolver():
 
                         # Debug
                         
-                        if thisMiddleStopID == "LOCMARS" and lastMiddleStopID == "FRESTUW":
-                            a = 1
                         timeRV = revisit(lastMiddleStopID, thisMiddleStopID,
                                          originStopID, eachTimestamp, accessDic, arcsDicRT)
                         try:
@@ -309,14 +313,15 @@ def revisitSolver():
                         # lastTimeRV = accessDic[originStopID][lastMiddleStopID]["timeRV"]
                         # thisTripTypeSC = accessDic[originStopID][thisMiddleStopID]["lastTripTypeSC"]
                         # print(lastMiddleStopID, lastTimeRV, thisTripTypeSC)
-                    a = 1
+                        
 
-            insertList = []
-            for originStopID, ODs in accessDic.items():
+            
+            for originStopID, ODs in tqdm(accessDic.items()):
+                insertList = []
                 for destinationStopID, eachOD in ODs.items():
                     insertList.append(eachOD)
-            client.cota_access_rev[todayDate + "_" +
-                                   str(int(eachTimestamp))].insert_many(insertList)
+                client.cota_access_rev[todayDate + "_" +
+                                    str(int(eachTimestamp))].insert_many(insertList)
             print("-----", todayDate, "-----",
                   int(eachTimestamp), "-----", len(insertList))
 

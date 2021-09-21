@@ -1,4 +1,4 @@
-# Aggregate the original posteriori OD into posteriori STP. Need to first run 1) Dijkstra Solver
+# Aggregate the original retrospective OD into retrospective STP. Need to first run 1) Dijkstra Solver
 import sys
 import os
 import time
@@ -106,8 +106,8 @@ if __name__ == "__main__":
                 insertList.append(stopItem)
             
             if insertList != []:
-                client.cota_access_agg["post_" + aggDate + "_" + str(i)].drop()
-                client.cota_access_agg["post_" + aggDate+ "_" + str(i)].insert_many(insertList)
+                client.cota_access_agg["RET_" + aggDate + "_" + str(i)].drop()
+                client.cota_access_agg["RET_" + aggDate+ "_" + str(i)].insert_many(insertList)
             print("---------------", todayDate, date, "---------------")
             
 
