@@ -554,7 +554,7 @@ def collectiveInsert(args, output):
     todayDate = curDate.strftime("%Y%m%d")
     recordCollection = []
 
-    col_access = client.cota_access_rel["rel_" + todayDate + "_" +str(int(timestamp))]
+    col_access = client.cota_access_rel["add_" + todayDate + "_" +str(int(timestamp))]
 
     count = 0
     for eachVisitedSet in output:
@@ -572,8 +572,8 @@ if __name__ == "__main__":
     basicSolver = BasicSolver.BasicSolver()
     # startDate = date(2019, 6, 20)
     # startDate = date(2018, 2, 25)
-    startDate = date(2018, 5, 9)
-    endDate = date(2019, 2, 5)
+    startDate = date(2019, 9, 2)
+    endDate = date(2019, 9, 8)
     walkingDistanceLimit = 700
     timeDeltaLimit = 180 * 60
     walkingSpeed = 1.4
@@ -589,8 +589,8 @@ if __name__ == "__main__":
         
     for singleDate in (daterange):
         weekday = singleDate.weekday()
-        if weekday != 2:
-            continue
+        # if weekday != 2:
+        #     continue
         GTFSTimestamp = basicSolver.find_gtfs_time_stamp(singleDate)
         todaySeconds = atime.mktime(singleDate.timetuple())
         gtfsSeconds = str(transfer_tools.find_gtfs_time_stamp(singleDate))
@@ -627,7 +627,7 @@ if __name__ == "__main__":
         # todayTimestampList = [todaySeconds + 28800, todaySeconds + 46800, todaySeconds + 64800]
         for eachTimestamp in todayTimestampList:
             print("******************", singleDate, eachTimestamp, "******************")
-            if eachTimestamp < 1542214800: # Restart point
+            if eachTimestamp < 1567461600: # Restart point
                 continue
             # if eachTimestamp != 1563192000: # debug and restart
             #     continue
