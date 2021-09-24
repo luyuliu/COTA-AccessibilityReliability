@@ -619,7 +619,8 @@ if __name__ == "__main__":
         todayTimestampList = []
         # for i in range(24*numberOfTimeSamples):
         #     todayTimestampList.append(todaySeconds + i* 60*60/numberOfTimeSamples)
-        for i in [8, 12, 18]:
+        # for i in [8, 12, 18]:
+        for i in [8]:
             todayTimestampList.append(todaySeconds + i* 60*60/numberOfTimeSamples)
         
 
@@ -627,7 +628,7 @@ if __name__ == "__main__":
         # todayTimestampList = [todaySeconds + 28800, todaySeconds + 46800, todaySeconds + 64800]
         for eachTimestamp in todayTimestampList:
             print("******************", singleDate, eachTimestamp, "******************")
-            if eachTimestamp < 1567461600: # Restart point
+            if eachTimestamp < 1567598400: # Restart point add_20190904_1567598400
                 continue
             # if eachTimestamp != 1563192000: # debug and restart
             #     continue

@@ -14,7 +14,7 @@ timepointList = [8, 12, 18]
 budgetList = [i for i in range(5, 121, 5)]
 
 # predefined layer with symbology ready. The symobology is unique value. To satisfy the condition, you will need to make a field in the csv file called "tag" and tag = 1 means it's the room of interests. I do this in excel: basically create a new field and set all values to 1 and join. So after joining only the rooms of interests will have the tag=1 flag.
-symbologyLayer = r"D:\Luyu\reliability\serious_reliability\symbology.lyr"
+symbologyLayer = r"D:\Luyu\reliability\serious_reliability\symbology_SCdiffRT.lyr"
 
 
 for i in breakpointList:
@@ -43,7 +43,7 @@ for i in breakpointList:
                 arcpy.management.AddField(rawLayer, "symbol", "DOUBLE")
             except:
                 print("Field exists")
-            arcpy.CalculateField_management(rawLayer, "symbol", "!normdiff_" + str(k) + "!", "PYTHON_9.3")
+            arcpy.CalculateField_management(rawLayer, "symbol",  "(!PPA_SC_" + str(k) + "!-!PPA_RT_" + str(k) + "!)/!PPA_SC_" + str(k) + "!", "PYTHON_9.3")
 
             # Apply the symbology from the symbology layer to the input layer
             arcpy.ApplySymbologyFromLayer_management(rawLayer, symbologyLayer)
@@ -57,7 +57,7 @@ for i in breakpointList:
             #             fileLocation + "_" +  str(k)+ ".mxd")
             print(i, j, k)
 
-            arcpy.mapping.ExportToPNG(mxd, r"D:\Luyu\reliability\serious_reliability\pdfs" + "\\" + fileLocation + "_" +  str(k)+ ".png")
+            arcpy.mapping.ExportToPNG(mxd, r"D:\Luyu\reliability\serious_reliability\pdfs\normdiff_SCdiffRT" + "\\" + fileLocation + "_" +  str(k)+ ".png")
             # arcpy.mapping.ExportToPDF(
             #     new_mxd, r"D:\Luyu\reliability\serious_reliability\pdfs" + "\\" + fileLocation + ".pdf")
             del mxd, rawLayer
