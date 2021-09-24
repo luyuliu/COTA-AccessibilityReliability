@@ -572,8 +572,8 @@ if __name__ == "__main__":
     basicSolver = BasicSolver.BasicSolver()
     # startDate = date(2019, 6, 20)
     # startDate = date(2018, 2, 25)
-    startDate = date(2019, 9, 2)
-    endDate = date(2019, 9, 8)
+    startDate = date(2019, 9, 4)
+    endDate = date(2019, 9, 5)
     walkingDistanceLimit = 700
     timeDeltaLimit = 180 * 60
     walkingSpeed = 1.4
@@ -620,7 +620,7 @@ if __name__ == "__main__":
         # for i in range(24*numberOfTimeSamples):
         #     todayTimestampList.append(todaySeconds + i* 60*60/numberOfTimeSamples)
         # for i in [8, 12, 18]:
-        for i in [8]:
+        for i in list(range(6,24)):
             todayTimestampList.append(todaySeconds + i* 60*60/numberOfTimeSamples)
         
 
@@ -628,8 +628,8 @@ if __name__ == "__main__":
         # todayTimestampList = [todaySeconds + 28800, todaySeconds + 46800, todaySeconds + 64800]
         for eachTimestamp in todayTimestampList:
             print("******************", singleDate, eachTimestamp, "******************")
-            if eachTimestamp < 1567598400: # Restart point add_20190904_1567598400
-                continue
+            # if eachTimestamp < 1567598400: # Restart point add_20190904_1567598400
+            #     continue
             # if eachTimestamp != 1563192000: # debug and restart
             #     continue
             args = [int(eachTimestamp), walkingDistanceLimit, timeDeltaLimit, walkingSpeed, scooterSpeed, scooterDistanceLimit, isRealTime, isScooter]
