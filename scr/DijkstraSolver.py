@@ -572,8 +572,8 @@ if __name__ == "__main__":
     basicSolver = BasicSolver.BasicSolver()
     # startDate = date(2019, 6, 20)
     # startDate = date(2018, 2, 25)
-    startDate = date(2019, 9, 5)
-    endDate = date(2019, 9, 11)
+    startDate = date(2019, 5, 9)
+    endDate = date(2019, 5, 15)
     walkingDistanceLimit = 700
     timeDeltaLimit = 180 * 60
     walkingSpeed = 1.4
