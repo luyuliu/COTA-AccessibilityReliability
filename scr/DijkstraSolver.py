@@ -572,8 +572,8 @@ if __name__ == "__main__":
     basicSolver = BasicSolver.BasicSolver()
     # startDate = date(2019, 6, 20)
     # startDate = date(2018, 2, 25)
-    startDate = date(2019, 9, 4)
-    endDate = date(2019, 9, 5)
+    startDate = date(2019, 9, 5)
+    endDate = date(2019, 9, 11)
     walkingDistanceLimit = 700
     timeDeltaLimit = 180 * 60
     walkingSpeed = 1.4
@@ -619,8 +619,8 @@ if __name__ == "__main__":
         todayTimestampList = []
         # for i in range(24*numberOfTimeSamples):
         #     todayTimestampList.append(todaySeconds + i* 60*60/numberOfTimeSamples)
-        # for i in [8, 12, 18]:
-        for i in list(range(6,24)):
+        for i in [8]:
+        # for i in list(range(6,24)):
             todayTimestampList.append(todaySeconds + i* 60*60/numberOfTimeSamples)
         
 

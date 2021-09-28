@@ -98,21 +98,18 @@ def revisit(lastMiddleStopID, thisMiddleStopID, originStopID, eachTimestamp, acc
     #     for timeGen, eachArc in arcsList.items():
     #         print(lastTime, timeGen, eachArc["time_gen_S"])
     
-    if lastMiddleStopID == "FREOAKE" and thisMiddleStopID == "FRESTUW":
-        a = 1
+    # if lastMiddleStopID == "FREOAKE" and thisMiddleStopID == "FRESTUW":
+    #     a = 1
     accessDic[originStopID][thisMiddleStopID]["revisitTag"] = True
     return accessDic[originStopID][thisMiddleStopID]["timeRV"]
 
 
 def revisitSolver():
     db_access = client.cota_access_rel
-    startDate = date(2018, 3, 15)
-    # # startDate = date(2019, 7, 1)
-    # startDate = date(2018, 2, 26)
-    # startDate = date(2018, 3, 8)
-    endDate = date(2019, 2, 5)
-    startDate = date(2018, 5, 9)
-    endDate = date(2019, 2, 5)
+    # startDate = date(2018, 3, 15)
+    # endDate = date(2019, 2, 5)
+    startDate = date(2019, 9, 5)
+    endDate = date(2019, 9, 11)
     walkingDistanceLimit = 700
     timeDeltaLimit = 480 * 60 # Extend the query limit to guarantee there is no missing trips, because there will be a lot of missing trips.
     walkingSpeed = 1.4
@@ -121,20 +118,23 @@ def revisitSolver():
 
     for singleDate in (daterange):
         weekday = singleDate.weekday()
-        if weekday != 2:
-            continue
+        # if weekday != 2:
+        #     continue
         todayDate = singleDate.strftime("%Y%m%d")
         GTFSTimestamp = transfer_tools.find_gtfs_time_stamp(singleDate)
         todaySeconds = atime.mktime(singleDate.timetuple())
         gtfsSeconds = str(transfer_tools.find_gtfs_time_stamp(singleDate))
         todayTimestampList = []
 
-        for i in [8, 12, 18]:
+        for i in [8]:
+        # for i in list(range(6,24)):
+            # if i == 8 or i == 12 or i == 18:
+            #     continue
             todayTimestampList.append(todaySeconds + i * 60*60)
 
         for eachTimestamp in todayTimestampList:
-            if eachTimestamp < 1542214800: # Restart point
-                continue
+            # if eachTimestamp < 1542214800: # Restart point
+            #     continue
             print("-----", todayDate, "-----",
                   int(eachTimestamp), "----- Start")
             col_stops = db_GTFS[str(GTFSTimestamp) + "_stops"]
@@ -145,7 +145,8 @@ def revisitSolver():
             rl_stops = col_stops.find({})
             
             accessDic = {}
-            col_access = db_access["rel_" + todayDate + "_" + str(int(eachTimestamp))]
+            # col_access = db_access["rel_" + todayDate + "_" + str(int(eachTimestamp))]
+            col_access = db_access["add_" + todayDate + "_" + str(int(eachTimestamp))]
             rl_access = (col_access.find({}))
 
             stopsDic = {}

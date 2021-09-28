@@ -72,12 +72,12 @@ for eachDate in dateList:
     if count == 0:
         continue
     for j in range(len(budgetList)):
-        RVList[j] /= count
-        SCList[j] /= count
-        RTList[j] /= count
-        SCdiffRVList[j] = SCList[j] - RVList[j]
-        SCdiffRTList[j] = SCList[j] - RTList[j]
-        RTdiffRVList[j] = RTList[j] - RVList[j]
+        # RVList[j] /= count
+        # SCList[j] /= count
+        # RTList[j] /= count
+        SCdiffRVList[j] = (SCList[j] - RVList[j])/SCList[j]
+        SCdiffRTList[j] = (SCList[j] - RTList[j])/SCList[j]
+        RTdiffRVList[j] = (RTList[j] - RVList[j])/RTList[j]
 
 
     print(SCdiffRVList)

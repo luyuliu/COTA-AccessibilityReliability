@@ -8,7 +8,7 @@ client = MongoClient('mongodb://localhost:27017/')
 
 breakpointList = [date(2018, 1, 1), date(2018, 5, 1), date(2018, 9, 1), date(
     2019, 1, 1), date(2019, 5, 1), date(2019, 9, 1), date(2020, 1, 1), date(2020, 5, 1)]
-jj = 8
+jj = 18
 budgetList = [i for i in range(5, 121, 5)]
 
 leftup = [40.0064, -83.016767]
