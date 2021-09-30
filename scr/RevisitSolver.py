@@ -110,6 +110,8 @@ def revisitSolver():
     # endDate = date(2019, 2, 5)
     startDate = date(2019, 9, 5)
     endDate = date(2019, 9, 11)
+    startDate = date(2019, 5, 9)
+    endDate = date(2019, 5, 15)
     walkingDistanceLimit = 700
     timeDeltaLimit = 480 * 60 # Extend the query limit to guarantee there is no missing trips, because there will be a lot of missing trips.
     walkingSpeed = 1.4
