@@ -356,6 +356,8 @@ $('#show-tragectory-button').click(function () {
   var end_stop = $("#end-stop-input").val();
   var startTimestamp = 1532534400
   var queryURL = 'http://127.0.0.1:20190/rel_20180725_1532534400?where={"startStopID":"' + start_stop + '"}';
+  
+  // var queryURL = 'http://127.0.0.1:20191/20190904_1567598400?where={"startStopID":"' + start_stop + '"}';
 
   $.get(queryURL, function (rawstops) {
     var stops = rawstops._items;
