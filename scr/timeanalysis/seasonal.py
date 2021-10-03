@@ -8,20 +8,17 @@ client = MongoClient('mongodb://localhost:27017/')
 
 breakpointList = [date(2018, 1, 1), date(2018, 5, 1), date(2018, 9, 1), date(
     2019, 1, 1), date(2019, 5, 1), date(2019, 9, 1), date(2020, 1, 1), date(2020, 5, 1)]
-jj = 18
+# breakpointList = [date(2019, 9, 1)]
+jj = 8
 budgetList = [i for i in range(5, 121, 5)]
 
-leftup = [40.0064, -83.016767]
-rightdown = [39.95232, -82.983164]
-
-leftup2 = [	40.064282, -83.07086]
-rightdown2 = [	39.913961, 		-82.929287]
-
 for i in breakpointList:
-    inList = [0] * len(budgetList)
-    meanList = [0] * len(budgetList)
-    middleList = [0] * len(budgetList)
-    outList = [0] * len(budgetList)
+    SCList = [0] * len(budgetList)
+    RVList = [0] * len(budgetList)
+    RTList = [0] * len(budgetList)
+    SCdiffRVList = [0] * len(budgetList)
+    SCdiffRTList = [0] * len(budgetList)
+    RTdiffRVList = [0] * len(budgetList)
     count = 0
     inCount = 0
     outCount = 0
@@ -31,33 +28,21 @@ for i in breakpointList:
     # print(len(rl), "REA_" + (i.strftime("%Y%m%d")) + "_" + str(j))
     for od in rl:
         count += 1
-        if float(od["lon"]) < rightdown[1] and float(od["lat"]) > rightdown[0] and float(od["lon"]) > leftup[1] and float(od["lat"]) < leftup[0]:
-            inCount += 1
-        elif float(od["lon"]) < rightdown2[1] and float(od["lat"]) > rightdown2[0] and float(od["lon"]) > leftup2[1] and float(od["lat"]) < leftup2[0]:
-            middleCount += 1
-        else:
-            outCount += 1
         for ki in range(len(budgetList)):
             k = budgetList[ki]
-            if float(od["lon"]) < rightdown[1] and float(od["lat"]) > rightdown[0] and float(od["lon"]) > leftup[1] and float(od["lat"]) < leftup[0]:
-                inList[ki] += (od["PPA_SC_" + str(k)] - od["PPA_RV_" + str(k)])/od["PPA_SC_" + str(k)]
-            elif float(od["lon"]) < rightdown2[1] and float(od["lat"]) > rightdown2[0] and float(od["lon"]) > leftup2[1] and float(od["lat"]) < leftup2[0]:
-                middleList[ki] += (od["PPA_SC_" + str(k)] - od["PPA_RV_" + str(k)])/od["PPA_SC_" + str(k)]
-            else:
-                outList[ki] += (od["PPA_SC_" + str(k)] - od["PPA_RV_" + str(k)])/od["PPA_SC_" + str(k)]
-            meanList[ki] += (od["PPA_SC_" + str(k)] - od["PPA_RV_" + str(k)])/od["PPA_SC_" + str(k)]
+            SCList[ki] += od["PPA_SC_" + str(k)] 
+            RVList[ki] += od["PPA_RV_" + str(k)] 
+            RTList[ki] += od["PPA_RT_" + str(k)] 
             
     # print(count, inCount,  middleCount, outCount)
-    for j in range(len(budgetList)):
-        inList[j] /= inCount
-        outList[j] /= outCount
-        middleList[j] /= middleCount
-        meanList[j] /= count
+    for ki in range(len(budgetList)):
+        SCdiffRVList[ki] = (SCList[ki] - RVList[ki])/SCList[ki]
+        SCdiffRTList[ki] = (SCList[ki] - RTList[ki])/SCList[ki]
+        RTdiffRVList[ki] = (RTList[ki] - RVList[ki])/RTList[ki]
 
-    print(inList)
-    print(middleList)
-    print(outList)
-    print(meanList)
+    print(SCdiffRVList)
+    print(SCdiffRTList)
+    print(RTdiffRVList)
     print("  ")
 
                 

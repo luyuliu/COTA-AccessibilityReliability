@@ -566,7 +566,7 @@ var marker_list_SC = new Array();
 
 $("#stp-button").click(function () {
   var start_stop = $("#stop-input").val()
-  var queryURL = 'http://127.0.0.1:20190/acc_20190701_1561982400?where={"startStopID":"' + start_stop + '"}';
+  var queryURL = 'http://127.0.0.1:20191/20180207_1518008400?where={"startStopID":"' + start_stop + '"}';
   var budget = $("#budget-input").val()
 
   $.get(queryURL, function (raw) {
@@ -574,40 +574,45 @@ $("#stp-button").click(function () {
     for (var i = 0; i < stops.length; i++) {
       var stop = stops[i];
       var speed = 1.4;
-      var actual_budget_RT = (budget * 60 - stop.timeRT) * speed; // meters
+      var actual_budget_RT = (budget * 60 - stop.timeRV) * speed; // meters
       var actual_budget_SC = (budget * 60 - stop.timeSC) * speed; // meters
 
-      var limit = 700; // meters
+      // var limit = 700; // meters
+      var limit = 100; // meters
       if (actual_budget_RT > limit) {
         actual_budget_RT = limit
-      }
-      if (actual_budget_RT < 0) {
-        actual_budget_RT = 0
-        continue
       }
       if (actual_budget_SC > limit) {
         actual_budget_SC = limit
       }
       if (actual_budget_SC < 0) {
         actual_budget_SC = 0
-        continue
+      }
+      if (actual_budget_RT < 0) {
+        actual_budget_RT = 0
       }
 
-      var marker_RT = L.circle([stop.stop_lat, stop.stop_lon], {
-        color: "red",
-        radius: actual_budget_RT,
-        stroke: 0,
-        opacity: 1
-      }).addTo(map);
-      marker_list_RT.push(marker_RT)
+      if (actual_budget_RT > 0){
+        var marker_RT = L.circle([stop.stop_lat, stop.stop_lon], {
+          color: "red",
+          radius: actual_budget_RT,
+          stroke: 0,
+          opacity: 1
+        }).addTo(map);
+        marker_RT.bindPopup("<b>stop ID: " + stop.stop_id + ":" + (stop.timeRV) + "_" + (stop.timeSC) + "</b>")
+        marker_list_RT.push(marker_RT)
+      }
 
-      var marker_SC = L.circle([stop.stop_lat, stop.stop_lon], {
-        color: "blue",
-        radius: actual_budget_SC,
-        stroke: 0,
-        opacity: 1
-      }).addTo(map);
-      marker_list_SC.push(marker_SC)
+      if (actual_budget_SC > 0){
+        var marker_SC = L.circle([stop.stop_lat, stop.stop_lon], {
+          color: "blue",
+          radius: actual_budget_SC,
+          stroke: 0,
+          opacity: 1
+        }).addTo(map);
+        marker_SC.bindPopup("<b>stop ID: " + stop.stop_id + ":" + (stop.timeRV) + "_" + (stop.timeSC) + "</b>")
+        marker_list_SC.push(marker_SC)
+      }
 
 
     }
