@@ -14,11 +14,11 @@ def daterange(start_date, end_date):
     for n in range(int((end_date - start_date).days)):
         yield start_date + timedelta(n)
 
-# dateList = list(daterange(date(2019, 9, 4), date(2019, 9, 11)))
+dateList = list(daterange(date(2019, 9, 4), date(2019, 9, 11)))
 
-startDate = date(2019, 5, 9)
-endDate = date(2019, 5, 15)
-dateList = list(daterange(startDate, endDate))
+# startDate = date(2019, 5, 9)
+# endDate = date(2019, 5, 15)
+# dateList = list(daterange(startDate, endDate))
 
 jj = 8
 budgetList = [i for i in range(5, 121, 5)]
@@ -79,9 +79,9 @@ for eachDate in dateList:
         # RVList[j] /= count
         # SCList[j] /= count
         # RTList[j] /= count
-        SCdiffRVList[j] = (SCList[j] - RVList[j])/SCList[j]
-        SCdiffRTList[j] = (SCList[j] - RTList[j])/SCList[j]
-        RTdiffRVList[j] = (RTList[j] - RVList[j])/RTList[j]
+        SCdiffRVList[j] = (SCList[j] - RVList[j])/RVList[j]
+        SCdiffRTList[j] = (SCList[j] - RTList[j])/RTList[j]
+        RTdiffRVList[j] = (RTList[j] - RVList[j])/RVList[j]
 
 
     print(SCdiffRVList)

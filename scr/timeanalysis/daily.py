@@ -26,6 +26,9 @@ leftup2 = [	40.064282, -83.07086]
 rightdown2 = [39.913961, -82.929287]
 
 for eachDate in dateList:
+    weekday = eachDate.weekday()
+    if weekday != 2:
+        continue
     # inList = [0] * len(budgetList)
     SCList = [0] * len(budgetList)
     RVList = [0] * len(budgetList)
@@ -75,9 +78,9 @@ for eachDate in dateList:
         # RVList[j] /= count
         # SCList[j] /= count
         # RTList[j] /= count
-        SCdiffRVList[j] = (SCList[j] - RVList[j])/SCList[j]
-        SCdiffRTList[j] = (SCList[j] - RTList[j])/SCList[j]
-        RTdiffRVList[j] = (RTList[j] - RVList[j])/RTList[j]
+        SCdiffRVList[j] = (SCList[j] - RVList[j])/RVList[j]
+        SCdiffRTList[j] = (SCList[j] - RTList[j])/RTList[j]
+        RTdiffRVList[j] = (RTList[j] - RVList[j])/RVList[j]
 
 
     print(SCdiffRVList)

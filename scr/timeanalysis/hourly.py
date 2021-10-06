@@ -77,9 +77,9 @@ for jj in range(6, 24):
         # RVList[j] /= count
         # SCList[j] /= count
         # RTList[j] /= count
-        SCdiffRVList[j] = (SCList[j] - RVList[j])/SCList[j]
-        SCdiffRTList[j] = (SCList[j] - RTList[j])/SCList[j]
-        RTdiffRVList[j] = (RTList[j] - RVList[j])/RTList[j]
+        SCdiffRVList[j] = (SCList[j] - RVList[j])/RVList[j]
+        SCdiffRTList[j] = (SCList[j] - RTList[j])/RTList[j]
+        RTdiffRVList[j] = (RTList[j] - RVList[j])/RVList[j]
 
 
     # print(RVList)
