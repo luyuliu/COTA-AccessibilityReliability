@@ -13,7 +13,7 @@ timepointList = [8]
 budgetList = [i for i in range(5, 121, 5)]
 
 # predefined layer with symbology ready. The symobology is unique value. To satisfy the condition, you will need to make a field in the csv file called "tag" and tag = 1 means it's the room of interests. I do this in excel: basically create a new field and set all values to 1 and join. So after joining only the rooms of interests will have the tag=1 flag.
-symbologyLayer = r"D:\Luyu\reliability\serious_reliability\buffer_layer.lyr"
+symbologyLayer = r"D:\Luyu\reliability\serious_reliability\buffer_layer_SC.lyr"
 
 
 for i in breakpointList:
