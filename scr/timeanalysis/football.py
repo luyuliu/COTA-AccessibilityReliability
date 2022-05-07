@@ -14,9 +14,9 @@ def daterange(start_date, end_date):
     for n in range(int((end_date - start_date).days)):
         yield start_date + timedelta(n)
 
-dateList = [date(2018,9,1), date(2018,9,8), date(2018,9,22), date(2018,10,6), date(2018,10,13), date(2018,11,3), date(2018,11,24), date(2019,8,31), date(2019,9,7), date(2019,9,21), date(2019,10,5), date(2019,10,26), date(2019,11,9), date(2019,11,23)]
-dateList = [date(2018,8,25), date(2018,9,15), date(2018,9,29), date(2018,10,20), date(2018,10,27), date(2018,11,10), date(2018,11,17), date(2019,9,14), date(2019,9,28), date(2019,10,12), date(2019,10,19), date(2019,11,2), date(2019,11,9)] # Control group
-       
+# dateList = [date(2018,9,1), date(2018,9,8), date(2018,9,22), date(2018,10,6), date(2018,10,13), date(2018,11,3), date(2018,11,24), date(2019,8,31), date(2019,9,7), date(2019,9,21), date(2019,10,5), date(2019,10,26), date(2019,11,9), date(2019,11,23)]
+# dateList = [date(2018,8,25), date(2018,9,15), date(2018,9,29), date(2018,10,20), date(2018,10,27), date(2018,11,10), date(2018,11,17), date(2019,9,14), date(2019,9,28), date(2019,10,12), date(2019,10,19), date(2019,11,2), date(2019,11,9)] # Control group
+dateList = [date(2018, 9, 8)]
 
 budgetList = [i for i in range(5, 121, 5)]
 
@@ -26,7 +26,7 @@ budgetList = [i for i in range(5, 121, 5)]
 # leftup2 = [	40.064282, -83.07086]
 # rightdown2 = [39.913961, -82.929287]
 
-for jj in [8, 12, 18]:
+for jj in [8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22]:
     for eachDate in dateList:
         weekday = eachDate.weekday()
         # inList = [0] * len(budgetList)
