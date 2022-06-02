@@ -16,9 +16,9 @@ import transfer_tools
 client = MongoClient('mongodb://localhost:27017/')
 
 if __name__ == "__main__":
-    # daterange = [date(2018,9,1), date(2018,9,8), date(2018,9,22), date(2018,10,6), date(2018,10,13), date(2018,11,3), date(2018,11,24), date(2019,8,31), date(2019,9,7), date(2019,9,21), date(2019,10,5), date(2019,10,26), date(2019,11,9), date(2019,11,23)]
+    daterange = [date(2018,9,1), date(2018,9,8), date(2018,9,22), date(2018,10,6), date(2018,10,13), date(2018,11,3), date(2018,11,24), date(2019,8,31), date(2019,9,7), date(2019,9,21), date(2019,10,5), date(2019,10,26), date(2019,11,9), date(2019,11,23)]
     # daterange = [date(2018,8,25), date(2018,9,15), date(2018,9,29), date(2018,10,20), date(2018,10,27), date(2018,11,10), date(2018,11,17), date(2019,9,14), date(2019,9,28), date(2019,10,12), date(2019,10,19), date(2019,11,2), date(2019,11,9)] # Control group
-    daterange = [date(2018, 9, 8)]
+    # daterange = [date(2018, 9, 8)]
     budgetList = [i for i in range(0, 121, 5)]
     
     for i in [9, 10, 11, 13, 14, 15, 16, 17, 19, 20, 21, 22]:

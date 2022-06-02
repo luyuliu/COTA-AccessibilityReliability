@@ -582,7 +582,7 @@ if __name__ == "__main__":
     sampleRate = 20
     isRealTime = True
     isScooter = False
-    daterange = [date(2018,9,1), date(2018,9,8), date(2018,9,22), date(2018,10,6), date(2018,10,13), date(2018,11,3), date(2018,11,24), date(2019,8,31), date(2019,9,7), date(2019,9,21), date(2019,10,5), date(2019,10,26), date(2019,11,9), date(2019,11,23)]
+    daterange = [date(2019,10,26)]
     # daterange = [date(2018,8,25), date(2018,9,15), date(2018,9,29), date(2018,10,20), date(2018,10,27), date(2018,11,10), date(2018,11,17), date(2019,8,31), date(2019,9,14), date(2019,9,28), date(2019,10,12), date(2019,10,19), date(2019,11,2), date(2019,11,9)] # Control group
     numberOfTimeSamples = 1 # how many samples you want to calculate per hour. If the value = 1, then every 1 hour. If 4, then every 15 minutes.
     
@@ -620,7 +620,7 @@ if __name__ == "__main__":
         todayTimestampList = []
         # for i in range(24*numberOfTimeSamples):
         #     todayTimestampList.append(todaySeconds + i* 60*60/numberOfTimeSamples)
-        for i in [9, 10, 11, 13, 14, 15, 16, 17, 19, 20, 21, 22]:
+        for i in [13, 14, 15, 16, 17]:
         # for i in list(range(6,24)):
             todayTimestampList.append(todaySeconds + i* 60*60/numberOfTimeSamples)
         
@@ -629,8 +629,8 @@ if __name__ == "__main__":
         # todayTimestampList = [todaySeconds + 28800, todaySeconds + 46800, todaySeconds + 64800]
         for eachTimestamp in todayTimestampList:
             print("******************", singleDate, eachTimestamp, "******************")
-            if eachTimestamp <= 1572127200: # Restart point 20181006_1538859600
-                continue
+            # if eachTimestamp <= 1572127200: # Restart point 20181006_1538859600
+            #     continue
             # if eachTimestamp != 1563192000: # debug and restart
             #     continue
             args = [int(eachTimestamp), walkingDistanceLimit, timeDeltaLimit, walkingSpeed, scooterSpeed, scooterDistanceLimit, isRealTime, isScooter]
