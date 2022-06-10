@@ -117,7 +117,7 @@ def revisitSolver():
     walkingSpeed = 1.4
     sampleRate = 20
     daterange = (transfer_tools.daterange(startDate, endDate))
-    daterange = [date(2018,9,22), date(2019,10,26)]
+    daterange = [date(2019,10,26)]
     # daterange = [date(2018,8,25), date(2018,9,15), date(2018,9,29), date(2018,10,20), date(2018,10,27), date(2018,11,10), date(2018,11,17), date(2019,9,14), date(2019,9,28), date(2019,10,12), date(2019,10,19), date(2019,11,2)] # Control group
     
 
@@ -131,7 +131,7 @@ def revisitSolver():
         gtfsSeconds = str(transfer_tools.find_gtfs_time_stamp(singleDate))
         todayTimestampList = []
 
-        for i in [13, 14, 15, 16, 17]:
+        for i in [11, 13, 14, 15, 16, 17]:
         # for i in list(range(6,24)):
             # if i == 8 or i == 12 or i == 18:
             #     continue
