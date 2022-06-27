@@ -3,15 +3,15 @@ from PIL import Image, ImageDraw, ImageFont
 from datetime import timedelta, date, datetime
 # filepaths
 
-breakpointList = [date(2018, 9, 1)]
+breakpointList = [date(2018,9,1), date(2018,9,8), date(2018,9,22), date(2018,10,6), date(2018,10,13), date(2018,11,3), date(2018,11,24), date(2019,8,31), date(2019,9,7), date(2019,9,21), date(2019,10,5), date(2019,10,26), date(2019,11,9), date(2019,11,23)]
 timepointList = [8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22]
-budgetList = [30]
+budgetList = [15, 30, 60]
 print("asdf")
 
 for i in breakpointList:
     for k in budgetList:
         img_list = []
-        fp_out = r"D:\Luyu\reliability\football\outputs\\" + i.strftime("%Y%m%d") + "_" + str(k) + ".gif"
+        fp_out = r"D:\Luyu\reliability\football\outputs\gif_" +str(k) + "\\" + i.strftime("%Y%m%d") + "_" + str(k) + ".gif"
         for j in timepointList: 
             print(i,j,k)
             fp_int = r"D:\Luyu\reliability\football\outputs\football1_" + i.strftime("%Y%m%d") + "_" + str(j) + "_" + str(k) + ".png"

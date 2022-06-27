@@ -8,9 +8,9 @@ import numpy
 from datetime import timedelta, date, datetime
 arcpy.env.overwriteOutput = True
 
-breakpointList = [date(2018, 9, 1)]
+breakpointList = [date(2019,11,23)]
 timepointList = [8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22]
-budgetList = [30]
+budgetList = [15, 30, 60]
 
 # predefined layer with symbology ready. The symobology is unique value. To satisfy the condition, you will need to make a field in the csv file called "tag" and tag = 1 means it's the room of interests. I do this in excel: basically create a new field and set all values to 1 and join. So after joining only the rooms of interests will have the tag=1 flag.
 symbologyLayer = r"D:\Luyu\reliability\football\symbology.lyr"
