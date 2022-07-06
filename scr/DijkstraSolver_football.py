@@ -596,7 +596,7 @@ def collectiveInsert(args, output):
     todayDate = curDate.strftime("%Y%m%d")
     recordCollection = []
 
-    col_access = client.cota_access_football_control[todayDate + "_" + str(
+    col_access = client.cota_access_football_normal[todayDate + "_" + str(
         int(timestamp))]
 
     count = 0
@@ -628,10 +628,12 @@ if __name__ == "__main__":
     isScooter = False
     # daterange = [date(2018, 9, 1), date(2018, 9, 8), date(2018, 9, 22), date(2018, 10, 6), date(2018, 10, 13), date(2018, 11, 3), date(
     #     2018, 11, 24), date(2019, 8, 31), date(2019, 9, 7), date(2019, 9, 21), date(2019, 10, 5), date(2019, 10, 26), date(2019, 11, 9), date(2019, 11, 23)]
-    daterange = [date(2018, 9, 15), date(2018, 9, 29), date(2018, 10, 20), date(2018, 11, 10), date(2018, 11, 17), date(2018, 12, 3), date(
-        2019, 1, 1), date(2019, 9, 14), date(2019, 9, 28), date(2019, 10, 18), date(2019, 11, 16), date(2019, 11, 16), date(2019, 11, 30), date(2019, 12, 7)]
-    # daterange = [date(2018, 10, 27), date(2018, 12, 1), date(2018, 12, 8), date(2018, 12, 15), date(2018, 12, 22), date(
-    #     2018, 12, 29), date(2019, 10, 12), date(2019, 10, 19), date(2019, 11, 2), date(2019, 12, 14), date(2019, 12, 21)]
+    # daterange = [date(2018, 9, 15), date(2018, 9, 29), date(2018, 10, 20), date(2018, 11, 10), date(2018, 11, 17), date(2018, 12, 3), date(
+    #     2019, 1, 1), date(2019, 9, 14), date(2019, 9, 28), date(2019, 10, 18), date(2019, 11, 16), date(2019, 11, 30), date(2019, 12, 7)]
+    # daterange = [ date(2019, 11, 30), date(2019, 12, 7)]
+    daterange = [date(2018, 10, 27), date(2018, 12, 1), date(2018, 12, 8), date(2018, 12, 15), date(2018, 12, 22), date(
+        2018, 12, 29), date(2019, 10, 12), date(2019, 10, 19), date(2019, 11, 2), date(2019, 12, 14), date(2019, 12, 21)]
+    daterange = [date(2018, 10, 27), date(2018, 12, 1), date(2018, 12, 8), date(2019, 10, 12), date(2019, 10, 19), date(2019, 11, 2)]
     # how many samples you want to calculate per hour. If the value = 1, then every 1 hour. If 4, then every 15 minutes.
     numberOfTimeSamples = 1
 
@@ -669,8 +671,8 @@ if __name__ == "__main__":
         #     todayTimestampList.append(todaySeconds + i* 60*60/numberOfTimeSamples)
         for i in [8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22]:
             # for i in list(range(6,24)):
-            if i == 8 or i == 12 or i == 18:
-                continue
+            # if i == 8 or i == 12 or i == 18:
+            #     continue
             todayTimestampList.append(
                 todaySeconds + i * 60*60/numberOfTimeSamples)
 
@@ -679,8 +681,8 @@ if __name__ == "__main__":
         for eachTimestamp in todayTimestampList:
             print("******************", singleDate,
                   eachTimestamp, int((eachTimestamp-todaySeconds)/3600), "******************")
-            if eachTimestamp < 1568469600: # Restart point 20181006_1538859600
-                continue
+            # if eachTimestamp < 1568469600: # Restart point 20181006_1538859600
+            #     continue
             # if eachTimestamp != 1563192000: # debug and restart
             #     continue
             args = [int(eachTimestamp), walkingDistanceLimit, timeDeltaLimit,
