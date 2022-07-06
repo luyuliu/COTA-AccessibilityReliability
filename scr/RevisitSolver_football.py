@@ -105,7 +105,7 @@ def revisit(lastMiddleStopID, thisMiddleStopID, originStopID, eachTimestamp, acc
 
 
 def revisitSolver():
-    db_access = client.cota_access_football
+    db_access = client.cota_access_football_control
     # startDate = date(2018, 3, 15)
     # endDate = date(2019, 2, 5)
     startDate = date(2019, 9, 5)
@@ -119,7 +119,8 @@ def revisitSolver():
     daterange = (transfer_tools.daterange(startDate, endDate))
     daterange = [date(2018,9,1), date(2018,9,8), date(2018,9,22), date(2018,10,6), date(2018,10,13), date(2018,11,3), date(2018,11,24), date(2019,8,31), date(2019,9,7), date(2019,9,21), date(2019,10,5), date(2019,10,26), date(2019,11,9), date(2019,11,23)]
     # daterange = [date(2018,8,25), date(2018,9,15), date(2018,9,29), date(2018,10,20), date(2018,10,27), date(2018,11,10), date(2018,11,17), date(2019,9,14), date(2019,9,28), date(2019,10,12), date(2019,10,19), date(2019,11,2)] # Control group
-    
+    daterange = [date(2018, 9, 15), date(2018, 9, 29), date(2018, 10, 20), date(2018, 11, 10), date(2018, 11, 17), date(2018, 12, 3), date(
+        2019, 1, 1), date(2019, 9, 14), date(2019, 9, 28), date(2019, 10, 18), date(2019, 11, 16), date(2019, 11, 30), date(2019, 12, 7)]
 
     for singleDate in (daterange):
         weekday = singleDate.weekday()
@@ -138,8 +139,8 @@ def revisitSolver():
             todayTimestampList.append(todaySeconds + i * 60*60)
 
         for eachTimestamp in todayTimestampList:
-            if eachTimestamp < 1537653600: # Restart point
-                continue
+            # if eachTimestamp < 1537653600: # Restart point
+            #     continue
             print("-----", todayDate, "-----",
                   int(eachTimestamp), "----- Start")
             col_stops = db_GTFS[str(GTFSTimestamp) + "_stops"]
@@ -326,7 +327,7 @@ def revisitSolver():
                 insertList = []
                 for destinationStopID, eachOD in ODs.items():
                     insertList.append(eachOD)
-                client.cota_access_football["REV_" + todayDate + "_" +
+                client.cota_access_football_control["REV_" + todayDate + "_" +
                                     str(int(eachTimestamp))].insert_many(insertList)
             print("-----", todayDate, "-----",
                   int(eachTimestamp), "-----", len(insertList))
