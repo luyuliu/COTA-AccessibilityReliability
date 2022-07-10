@@ -596,7 +596,7 @@ def collectiveInsert(args, output):
     todayDate = curDate.strftime("%Y%m%d")
     recordCollection = []
 
-    col_access = client.cota_access_football_normal[todayDate + "_" + str(
+    col_access = client.cota_access_covid[todayDate + "_" + str(
         int(timestamp))]
 
     count = 0
@@ -616,8 +616,8 @@ if __name__ == "__main__":
     basicSolver = BasicSolver.BasicSolver()
     # startDate = date(2019, 6, 20)
     # startDate = date(2018, 2, 25)
-    startDate = date(2019, 5, 9)
-    endDate = date(2019, 5, 15)
+    startDate = date(2020, 2, 15)
+    endDate = date(2021, 12, 1)
     walkingDistanceLimit = 700
     timeDeltaLimit = 180 * 60
     walkingSpeed = 1.4
@@ -626,17 +626,15 @@ if __name__ == "__main__":
     sampleRate = 20
     isRealTime = True
     isScooter = False
-    # daterange = [date(2018, 9, 1), date(2018, 9, 8), date(2018, 9, 22), date(2018, 10, 6), date(2018, 10, 13), date(2018, 11, 3), date(
-    #     2018, 11, 24), date(2019, 8, 31), date(2019, 9, 7), date(2019, 9, 21), date(2019, 10, 5), date(2019, 10, 26), date(2019, 11, 9), date(2019, 11, 23)]
-    # daterange = [date(2018, 9, 15), date(2018, 9, 29), date(2018, 10, 20), date(2018, 11, 10), date(2018, 11, 17), date(2018, 12, 3), date(
-    #     2019, 1, 1), date(2019, 9, 14), date(2019, 9, 28), date(2019, 10, 18), date(2019, 11, 16), date(2019, 11, 30), date(2019, 12, 7)]
-    # daterange = [ date(2019, 11, 30), date(2019, 12, 7)]
-    daterange = [date(2018, 10, 27), date(2018, 12, 1), date(2018, 12, 8), date(2018, 12, 15), date(2018, 12, 22), date(
-        2018, 12, 29), date(2019, 10, 12), date(2019, 10, 19), date(2019, 11, 2), date(2019, 12, 14), date(2019, 12, 21)]
-    daterange = [date(2018, 10, 27), date(2018, 12, 1), date(2018, 12, 8), date(2019, 10, 12), date(2019, 10, 19), date(2019, 11, 2)]
+    daterange = []
+    for n in range(int((endDate - startDate).days)):
+        currentDate = startDate + timedelta(n)
+        if currentDate.weekday() == 2:
+            daterange.append(currentDate)
+    print(daterange)
     # how many samples you want to calculate per hour. If the value = 1, then every 1 hour. If 4, then every 15 minutes.
     numberOfTimeSamples = 1
-
+    
     for singleDate in (daterange):
         weekday = singleDate.weekday()
         # if weekday != 2:
