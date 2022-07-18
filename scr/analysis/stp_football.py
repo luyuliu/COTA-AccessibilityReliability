@@ -19,9 +19,12 @@ if __name__ == "__main__":
     # daterange = [date(2018,9,1), date(2018,9,8), date(2018,9,22), date(2018,10,6), date(2018,10,13), date(2018,11,3), date(2018,11,24), date(2019,8,31), date(2019,9,7), date(2019,9,21), date(2019,10,5), date(2019,10,26), date(2019,11,9), date(2019,11,23)]
     # daterange = [date(2018,8,25), date(2018,9,15), date(2018,9,29), date(2018,10,20), date(2018,10,27), date(2018,11,10), date(2018,11,17), date(2019,9,14), date(2019,9,28), date(2019,10,12), date(2019,10,19), date(2019,11,2), date(2019,11,9)] # Control group
     daterange = [date(2018, 9, 22), date(2019, 10, 26)]
+    daterange = [date(2018, 9, 15), date(2018, 9, 29), date(2018, 10, 20), date(2018, 11, 10), date(2018, 11, 17), date(2018, 12, 3), date(
+        2019, 1, 1), date(2019, 9, 14), date(2019, 9, 28), date(2019, 10, 18), date(2019, 11, 16), date(2019, 11, 30), date(2019, 12, 7)]
+    # daterange = [date(2018, 10, 27), date(2018, 12, 1), date(2018, 12, 8), date(2019, 10, 12)]
     budgetList = [i for i in range(0, 121, 5)]
     
-    for i in [13, 14, 15, 16, 17]:
+    for i in [8, 9, 10, 11, 12, 18, 19, 20, 21, 22]:
         insertList = []
         fullObject = {}
         for singleDate in (daterange):
@@ -34,7 +37,11 @@ if __name__ == "__main__":
             db_stops = client.cota_gtfs[gtfsSeconds + "_stops"]
 
             todayTimestamp = (todaySeconds + i * 60*60)
-            col_access = client.cota_access_football["REV_" + todayDate + "_" + str(int(todayTimestamp))]
+            if i == 8 or i == 12 or i == 18:
+                col_access = client.cota_access_football["REV_" + todayDate + "_" + str(int(todayTimestamp))]
+            else:
+                col_access = client.cota_access_football_control["REV_" + todayDate + "_" + str(int(todayTimestamp))]
+
             print(todayDate + "_" + str(int(todayTimestamp)))
             rl_access = col_access.find({})
             
@@ -82,7 +89,7 @@ if __name__ == "__main__":
                 insertList.append(item)
                 
             if insertList != []:
-                client.cota_access_football["football_" + todayDate + "_" + str(i)].drop()
-                client.cota_access_football["football_" + todayDate+ "_" + str(i)].insert_many(insertList)
+                client.cota_access_football_control["football_" + todayDate + "_" + str(i)].drop()
+                client.cota_access_football_control["football_" + todayDate+ "_" + str(i)].insert_many(insertList)
                 
 

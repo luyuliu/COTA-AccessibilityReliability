@@ -563,7 +563,7 @@ def singleAccessibilitySolve(args, startLocation):
 
 
 def collectiveAccessibilitySolve(args, sampledStopsList):
-    cores = 30
+    cores = 25
     total_length = len(sampledStopsList)
     batch = math.ceil(total_length/cores)
 
@@ -616,7 +616,7 @@ if __name__ == "__main__":
     basicSolver = BasicSolver.BasicSolver()
     # startDate = date(2019, 6, 20)
     # startDate = date(2018, 2, 25)
-    startDate = date(2020, 2, 15)
+    startDate = date(2020, 3, 1)
     endDate = date(2021, 12, 1)
     walkingDistanceLimit = 700
     timeDeltaLimit = 180 * 60
@@ -631,7 +631,7 @@ if __name__ == "__main__":
         currentDate = startDate + timedelta(n)
         if currentDate.weekday() == 2:
             daterange.append(currentDate)
-    print(daterange)
+    print(len(daterange))
     # how many samples you want to calculate per hour. If the value = 1, then every 1 hour. If 4, then every 15 minutes.
     numberOfTimeSamples = 1
     
@@ -667,7 +667,7 @@ if __name__ == "__main__":
         todayTimestampList = []
         # for i in range(24*numberOfTimeSamples):
         #     todayTimestampList.append(todaySeconds + i* 60*60/numberOfTimeSamples)
-        for i in [8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22]:
+        for i in [8]:
             # for i in list(range(6,24)):
             # if i == 8 or i == 12 or i == 18:
             #     continue
@@ -679,8 +679,8 @@ if __name__ == "__main__":
         for eachTimestamp in todayTimestampList:
             print("******************", singleDate,
                   eachTimestamp, int((eachTimestamp-todaySeconds)/3600), "******************")
-            if eachTimestamp < 1543712400: # Restart point 20181006_1538859600
-                continue
+            # if eachTimestamp < 1543712400: # Restart point 20181006_1538859600
+            #     continue
             # if eachTimestamp != 1563192000: # debug and restart
             #     continue
             args = [int(eachTimestamp), walkingDistanceLimit, timeDeltaLimit,
