@@ -105,7 +105,7 @@ def revisit(lastMiddleStopID, thisMiddleStopID, originStopID, eachTimestamp, acc
 
 
 def revisitSolver():
-    db_access = client.cota_access_football
+    db_access = client.cota_access_football_normal
     # startDate = date(2018, 3, 15)
     # endDate = date(2019, 2, 5)
     startDate = date(2019, 9, 5)
@@ -117,7 +117,7 @@ def revisitSolver():
     walkingSpeed = 1.4
     sampleRate = 20
     daterange = (transfer_tools.daterange(startDate, endDate))
-    daterange = [date(2019,10,26)]
+    daterange = [date(2018, 12, 1), date(2018, 12, 8)]
     # daterange = [date(2018,8,25), date(2018,9,15), date(2018,9,29), date(2018,10,20), date(2018,10,27), date(2018,11,10), date(2018,11,17), date(2019,9,14), date(2019,9,28), date(2019,10,12), date(2019,10,19), date(2019,11,2)] # Control group
     
 
@@ -131,7 +131,7 @@ def revisitSolver():
         gtfsSeconds = str(transfer_tools.find_gtfs_time_stamp(singleDate))
         todayTimestampList = []
 
-        for i in [11, 13, 14, 15, 16, 17]:
+        for i in [8, 12, 18]:
         # for i in list(range(6,24)):
             # if i == 8 or i == 12 or i == 18:
             #     continue
@@ -326,7 +326,7 @@ def revisitSolver():
                 insertList = []
                 for destinationStopID, eachOD in ODs.items():
                     insertList.append(eachOD)
-                client.cota_access_football["REV_" + todayDate + "_" +
+                db_access["REV_" + todayDate + "_" +
                                     str(int(eachTimestamp))].insert_many(insertList)
             print("-----", todayDate, "-----",
                   int(eachTimestamp), "-----", len(insertList))

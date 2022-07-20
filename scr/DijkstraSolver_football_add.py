@@ -523,7 +523,7 @@ def singleAccessibilitySolve(args, startLocation): # Calculate travel time from 
     return lenStops
 
 def collectiveAccessibilitySolve(args, sampledStopsList):
-    cores = 30
+    cores = 25
     total_length = len(sampledStopsList)
     batch = math.ceil(total_length/cores)
     
@@ -554,7 +554,7 @@ def collectiveInsert(args, output):
     todayDate = curDate.strftime("%Y%m%d")
     recordCollection = []
 
-    col_access = client.cota_access_football[todayDate + "_" +str(int(timestamp))]
+    col_access = client.cota_access_football_control[todayDate + "_" +str(int(timestamp))]
 
     count = 0
     for eachVisitedSet in output:
@@ -582,7 +582,7 @@ if __name__ == "__main__":
     sampleRate = 20
     isRealTime = True
     isScooter = False
-    daterange = [date(2018, 12, 1), date(2018, 12, 8)]
+    daterange = [date(2018, 12, 3), date(2019, 1, 1), date(2019, 10, 18), date(2019, 11, 16), date(2019, 11, 30), date(2019, 12, 7)]
     # daterange = [date(2018,8,25), date(2018,9,15), date(2018,9,29), date(2018,10,20), date(2018,10,27), date(2018,11,10), date(2018,11,17), date(2019,8,31), date(2019,9,14), date(2019,9,28), date(2019,10,12), date(2019,10,19), date(2019,11,2), date(2019,11,9)] # Control group
     numberOfTimeSamples = 1 # how many samples you want to calculate per hour. If the value = 1, then every 1 hour. If 4, then every 15 minutes.
     
