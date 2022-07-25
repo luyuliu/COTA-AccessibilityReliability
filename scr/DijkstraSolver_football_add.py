@@ -630,8 +630,8 @@ if __name__ == "__main__":
         # todayTimestampList = [todaySeconds + 28800, todaySeconds + 46800, todaySeconds + 64800]
         for eachTimestamp in todayTimestampList:
             print("******************", singleDate, eachTimestamp, "******************")
-            # if eachTimestamp <= 1572127200: # Restart point 20181006_1538859600
-            #     continue
+            if eachTimestamp < 1573923600: # Restart point 20181006_1538859600
+                continue
             # if eachTimestamp != 1563192000: # debug and restart
             #     continue
             args = [int(eachTimestamp), walkingDistanceLimit, timeDeltaLimit, walkingSpeed, scooterSpeed, scooterDistanceLimit, isRealTime, isScooter]

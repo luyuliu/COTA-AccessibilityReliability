@@ -136,8 +136,8 @@ def revisitSolver():
             todayTimestampList.append(todaySeconds + i * 60*60)
 
         for eachTimestamp in todayTimestampList:
-            # if eachTimestamp <= 1543852800: # Restart point
-            #     continue
+            if eachTimestamp < 1635940800: # Restart pointREV_20211103_1635940800
+                continue
             print("-----", todayDate, "-----",
                   int(eachTimestamp), "----- Start")
             col_stops = db_GTFS[str(GTFSTimestamp) + "_stops"]

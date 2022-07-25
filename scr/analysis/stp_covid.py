@@ -25,10 +25,12 @@ if __name__ == "__main__":
             daterange.append(currentDate)
     budgetList = [i for i in range(0, 121, 5)]
     
-    for i in [8, 9, 10, 11, 12, 18, 19, 20, 21, 22]:
+    for i in [8]:
         insertList = []
         fullObject = {}
         for singleDate in (daterange):
+            if singleDate < date(2021, 11, 3):
+                continue
             weekday = singleDate.weekday()
             todayDate = singleDate.strftime("%Y%m%d")
             print("---------------", todayDate, "---------------")
