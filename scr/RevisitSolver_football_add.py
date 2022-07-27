@@ -105,7 +105,7 @@ def revisit(lastMiddleStopID, thisMiddleStopID, originStopID, eachTimestamp, acc
 
 
 def revisitSolver():
-    db_access = client.cota_access_football_normal
+    db_access = client.cota_access_football_control
     # startDate = date(2018, 3, 15)
     # endDate = date(2019, 2, 5)
     startDate = date(2019, 9, 5)
@@ -117,7 +117,7 @@ def revisitSolver():
     walkingSpeed = 1.4
     sampleRate = 20
     daterange = (transfer_tools.daterange(startDate, endDate))
-    daterange = [date(2018, 12, 1), date(2018, 12, 8)]
+    daterange = [date(2018, 12, 3), date(2019, 1, 1), date(2019, 10, 18), date(2019, 11, 16), date(2019, 11, 30), date(2019, 12, 7)]
     # daterange = [date(2018,8,25), date(2018,9,15), date(2018,9,29), date(2018,10,20), date(2018,10,27), date(2018,11,10), date(2018,11,17), date(2019,9,14), date(2019,9,28), date(2019,10,12), date(2019,10,19), date(2019,11,2)] # Control group
     
 
