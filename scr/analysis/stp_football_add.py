@@ -23,6 +23,7 @@ if __name__ == "__main__":
         2019, 1, 1), date(2019, 9, 14), date(2019, 9, 28), date(2019, 10, 18), date(2019, 11, 16), date(2019, 11, 30), date(2019, 12, 7)]
     daterange = [date(2018, 12, 1), date(2018, 12, 8)]
     # daterange = [date(2018, 10, 27), date(2018, 12, 1), date(2018, 12, 8), date(2019, 10, 12)]
+    daterange = [date(2018, 12, 3), date(2019, 1, 1), date(2019, 10, 18), date(2019, 11, 16), date(2019, 11, 30), date(2019, 12, 7)]
     budgetList = [i for i in range(0, 121, 5)]
     
     for i in [8, 12, 18]:
@@ -38,7 +39,7 @@ if __name__ == "__main__":
             db_stops = client.cota_gtfs[gtfsSeconds + "_stops"]
 
             todayTimestamp = (todaySeconds + i * 60*60)
-            col_access = client.cota_access_football_normal["REV_" + todayDate + "_" + str(int(todayTimestamp))]
+            col_access = client.cota_access_football_control["REV_" + todayDate + "_" + str(int(todayTimestamp))]
 
             print(todayDate + "_" + str(int(todayTimestamp)))
             rl_access = col_access.find({})
@@ -87,7 +88,7 @@ if __name__ == "__main__":
                 insertList.append(item)
                 
             if insertList != []:
-                client.cota_access_football_normal["football_" + todayDate + "_" + str(i)].drop()
-                client.cota_access_football_normal["football_" + todayDate+ "_" + str(i)].insert_many(insertList)
+                client.cota_access_football_control["football_" + todayDate + "_" + str(i)].drop()
+                client.cota_access_footballcontrol["football_" + todayDate+ "_" + str(i)].insert_many(insertList)
                 
 
